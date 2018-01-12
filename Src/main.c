@@ -599,12 +599,12 @@ int main(void)
 		switch (pushed_button){
 		case BUT_1:
 		{
-			led_compare = 0xffffffff;
+			led_compare = 0xffffffff; // nastaveni  casovani pro vypnuti na nejvetsi moznou hodnotu
 			Led1Clear;
 			Led2Clear;
-			HAL_GPIO_WritePin(D_LCD_LIGHT_GPIO_Port,D_LCD_LIGHT_Pin,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(D_LCD_LIGHT_GPIO_Port,D_LCD_LIGHT_Pin,GPIO_PIN_RESET); // zhasnuti podsviceni
 			lcd_clear();
-			HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFE);
+			//HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFE);
 			break;
 		}
 		case BUT_2:
