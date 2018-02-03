@@ -19,7 +19,7 @@
 #define MAX_CHAR_LENGHT 12
 #define MENU_TIMOUT 10000 // x second
 
-typedef enum  	{
+typedef enum {
 	clock,
 	date,
 	setTemperature,
@@ -38,11 +38,11 @@ extern menu_item_t* ActualMenu;
 extern uint32_t temperature_set;
 extern Buttons pushed_button;
 extern int8_t en_count;
-extern uint32_t temperature;
+extern int32_t temperature;
 
 
 uint8_t menu_action();
-void display_menu(menu_item_t *display_menu);
+void display_menu(menu_item_t* display_menu);
 Bool menu_timout();
 uint8_t activation_memu();
 

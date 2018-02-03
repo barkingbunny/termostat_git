@@ -89,8 +89,8 @@ static Screen show;
 Flags_main flags;
 uint32_t citac=0;
 int8_t en_count=0;
-uint32_t temperature=-20000;
-uint32_t humid = -5;
+int32_t temperature=-20000;
+int32_t humid = -5;
 uint32_t presure = 0;
 
 // Temp_seting and driving
@@ -175,7 +175,7 @@ int main(void)
 	lcd_setCharPos(0,0);
 	lcd_printString("Initialization unit\r");
 	lcd_printString("termostat_git\r");
-	lcd_printString( "SW v 0.207");
+	lcd_printString( "SW v 0.208");
 	HAL_TIM_Encoder_Start(&htim22,TIM_CHANNEL_1);
 
 	htim22.Instance->EGR = 1;           // Generate an update event
@@ -286,7 +286,7 @@ int main(void)
 
 			temperature=BME280_getTemperature();
 			humid=BME280_getHumidity();
-			presure=BME280_getPressure();
+		//	presure=BME280_getPressure();
 
 			current_state = VOLTAGE;
 
@@ -340,8 +340,7 @@ int main(void)
 						Led1Set;
 					}
 				}
-			}
-
+			}// end-if (flags.regulation_temp&(temperature < temperature_set))
 			else // vypni topeni
 			{
 				OUT1_Clear;
@@ -386,10 +385,7 @@ int main(void)
 		case desktop:
 		{// showing main screen - temperatures and Hum
 			if (flags.new_data_to_show==TRUE){
-
 				// BME280 sensor
-
-
 				lcd_setCharPos(1,4);
 				char_magnitude(2);
 				snprintf(buffer_s, 12, "%2d.%02d C",temperature/100,temperature%100);
@@ -435,25 +431,22 @@ int main(void)
 				lcd_printString(aShowTime);
 
 				//debug
-				lcd_setCharPos(0,beta2_part);
+				lcd_setCharPos(0,20);
 				if (beta_part){
 					lcd_printString("T");
 					beta_part = FALSE;
 				}
 				else {
-					lcd_printString("_");
+					lcd_printString("-");
 					beta_part = TRUE;
 				}
-				beta2_part++;
-				if (beta2_part>20){
-					beta2_part=12;
-				}
+
 				lcd_setCharPos(7,0);
 				snprintf(buffer_s, 18, "%d",hrtc.Instance->TR);
 				lcd_printString(buffer_s);
-
 				//debug
-				/* end of the time part - new timer set.*/
+
+				// end of the time part - new timer set.
 				time_compare = fill_comparer(TIME_PERIODE);
 				show_time = FALSE;
 			}
@@ -464,11 +457,8 @@ int main(void)
 			break;
 		}
 
-
-
 		case menu:
 		{
-
 			display_menu(ActualMenu);
 			break;
 		}
@@ -543,10 +533,15 @@ int main(void)
 // MENU TIMEOUT
 		if ((flags.menu_running==1)) // je to takhle slozite , protoze jsem neprisel na jiny efektivni zpusob, jak smazat displej, po zkonceni menu
 			if(menu_timout()) {
-				menu_action();
-				show = menu;
+				if (!menu_action()){ // exit from menu condition
+					flags.menu_running=0;
+					lcd_clear();
+					show = desktop;
+				}
+				else
+					show = menu;
 
-			} // if menu
+			} // if menu - TIMEOUT
 
 		if (flags.temp_new_set){
 			flags.temp_new_set = FALSE;
@@ -570,10 +565,12 @@ int main(void)
 		{
 			pushed_button = checkButtons();
 			button_compare = fill_comparer(BUT_DELAY);
+			//flags.enc_changed = FALSE;
 			// reading the actual number from encoder
 			if (en_count_last != htim22.Instance->CNT){
 				en_count+=htim22.Instance->CNT-en_count_last;
 				en_count_last=htim22.Instance->CNT;
+				flags.enc_changed = TRUE;
 				if (pushed_button == BUT_NONE) // enabling light/ increase time constants.
 					pushed_button = ENCODER;
 			}
@@ -581,7 +578,7 @@ int main(void)
 		if(pushed_button != BUT_NONE) // any button pushed?
 		{
 			HAL_GPIO_WritePin(D_LCD_LIGHT_GPIO_Port,D_LCD_LIGHT_Pin,GPIO_PIN_SET);
-			button_compare = fill_comparer(BUT_DELAY*200); // 200x - zpodeni cteni pri stisknuti
+			button_compare = fill_comparer(BUT_DELAY*200); // 200x - zpozdeni cteni pri stisknuti
 			backlite_compare = fill_comparer(BACKLITE_TIMEOUT);
 			show_timeout = fill_comparer(SHOW_TIMEOUT);
 		}
@@ -589,7 +586,7 @@ int main(void)
 		// -- BUTTON PROCCESS
 		switch (pushed_button){
 		case BUT_1:
-		{
+		{// Activate Menu
 			flags.menu_activate=1;
 			en_count = 0;
 			en_count_last=0;
@@ -601,9 +598,10 @@ int main(void)
 			break;
 		}
 		case BUT_2:
-		{
+		{// activate heater
 			if (!flags.regulation_temp){
 				flags.regulation_temp=TRUE;
+				flags.heating_up = TRUE;
 
 			}
 			else {
@@ -611,7 +609,7 @@ int main(void)
 			}
 			// new data to show - heating icon.
 			flags.new_data_to_show=TRUE;
-			//			show = debug;
+			//	show = debug;
 
 			break;
 		}

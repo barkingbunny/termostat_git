@@ -42,6 +42,7 @@ typedef struct {
 	uint8_t menu_running:1;
 	uint8_t temp_new_set:1;
 	uint8_t temp_running:1;
+	uint8_t enc_changed:1;
 // regulation of the temperature
 	uint8_t regulation_temp:1; // Signal when regulation of temp is enabled.
 	uint8_t heating_up:1; // record that heating is UP
