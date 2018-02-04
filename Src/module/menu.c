@@ -16,6 +16,7 @@ int8_t EN_count=-1;
 uint32_t set_temperature=2000;
 RTC_TimeTypeDef set_stimestructureget;
 RTC_HandleTypeDef set_RtcHandle;
+RTC_DateTypeDef set_datestruct;
 
 
 uint8_t activation_memu(){
@@ -24,6 +25,7 @@ uint8_t activation_memu(){
 	position=0;
 	position_x=0;
 	EN_count=-1;
+	en_count = 0;
 	ActualMenu=&MainMenu;
 	flags.menu_activate=0;
 	flags.menu_running=1;
@@ -71,59 +73,99 @@ uint8_t menu_action(){
 					}
 					else{	// if is not chosen the exit or back.
 						ActualMenu=ActualMenu->submenu[position];
-						if ((ActualMenu->action == clock)){
-
+						switch(ActualMenu->action)
+						{
+						case (clock):
+								{
 							HAL_RTC_GetTime(&hrtc, &set_stimestructureget, RTC_FORMAT_BIN);
-							HAL_RTC_SetTime(&set_RtcHandle, &set_stimestructureget, RTC_FORMAT_BIN);
-							position_x=1;
-
-#ifdef DEBUG
-							lcd_setCharPos(5,8);
-							char buffer_s [32];
-							snprintf(buffer_s, 12, " COMPARISM");
-							lcd_printString(buffer_s);
+							//HAL_RTC_SetTime(&set_RtcHandle, &set_stimestructureget, RTC_FORMAT_BIN);
+							position_x=0;
 							break;
-#endif //debug
-						}
+								} // end case CLOCK
+
+						case (date):
+									{
+							HAL_RTC_GetDate(&hrtc, &set_datestruct, RTC_FORMAT_BIN);
+							position_x=0;
+							break;
+									} // end case date
+						}// end SWITCH
+
 					}
 					lcd_clear();
 					en_count=0;
-				}
-
+				} // end IF - PUSHED BUTTON
 				break;
-				}
+						} // END case (next)
 
 			case (clock):
 					{
 				if (pushed_button == BUT_ENC){
 					position_x++;
 				}
-				if (position_x==1) {
+				if (position_x==0) {
 					set_stimestructureget.Hours=set_stimestructureget.Hours+en_count;
-					HAL_RTC_SetTime(&set_RtcHandle, &set_stimestructureget, RTC_FORMAT_BCD);
+					if (set_stimestructureget.Hours < 0) set_stimestructureget.Hours=0;
+					if (set_stimestructureget.Hours > 23) set_stimestructureget.Hours=23;
+				}
+				if (position_x==1){
+					set_stimestructureget.Minutes=set_stimestructureget.Minutes+en_count;
+					if (set_stimestructureget.Minutes < 0) set_stimestructureget.Minutes=0;
+					if (set_stimestructureget.Minutes > 59) set_stimestructureget.Minutes=59;
 				}
 				if (position_x==2){
-					set_stimestructureget.Minutes=set_stimestructureget.Minutes+en_count;
-					HAL_RTC_SetTime(&set_RtcHandle, &set_stimestructureget, RTC_FORMAT_BCD);
-				}
-				if (position_x==3){
 					set_stimestructureget.Seconds=set_stimestructureget.Seconds+en_count;
-					HAL_RTC_SetTime(&set_RtcHandle, &set_stimestructureget, RTC_FORMAT_BCD);
+					if (set_stimestructureget.Seconds < 0) set_stimestructureget.Seconds=0;
+					if (set_stimestructureget.Seconds > 59) set_stimestructureget.Seconds=59;
+
 				}
-				if (position_x==4){ // last click with encoder
-					HAL_RTC_SetTime(&hrtc, &set_stimestructureget, RTC_FORMAT_BCD);
+				if (position_x==3){ // last click with encoder
+					HAL_RTC_SetTime(&hrtc, &set_stimestructureget, RTC_FORMAT_BIN);
 					position_x=0;
 					flags.menu_running=0;
 					lcd_clear();
 					return 0; //exit menu
 				}
-				if (position_x>4)
-					position_x=1;
+				if (position_x>3)
+					position_x=0;
 
-#ifdef DEBUG
+
 				en_count=0;
-				return 1;
-#endif
+				break;
+					}
+
+			case (date):
+						{
+				if (pushed_button == BUT_ENC){
+					position_x++;
+				}
+				if (position_x==0) {
+					set_datestruct.Date=set_datestruct.Date+en_count;
+					if (set_datestruct.Date < 1) set_datestruct.Date=1;
+					if (set_datestruct.Date > 31) set_datestruct.Date=31;
+				}
+				if (position_x==1){
+					set_datestruct.Month = set_datestruct.Month+en_count;
+					if (set_datestruct.Month < 1) set_datestruct.Month=1;
+					if (set_datestruct.Month > 12) set_datestruct.Month=12;
+				}
+				if (position_x==2){
+					set_datestruct.Year = set_datestruct.Year+en_count;
+					if (set_datestruct.Year < 0) set_datestruct.Month=0;
+					if (set_datestruct.Year > 99) set_datestruct.Month=99;
+				}
+				if (position_x==3){ // last click with encoder
+					HAL_RTC_SetDate(&hrtc, &set_datestruct, RTC_FORMAT_BIN);
+					position_x=0;
+					flags.menu_running=0;
+					lcd_clear();
+					return 0; //exit menu
+				}
+				if (position_x>3)
+					position_x=0;
+
+
+				en_count=0;
 				break;
 					}
 
@@ -156,7 +198,6 @@ void display_menu(menu_item_t* display_menu) {
 		case (clock):
 				{
 			RTC_TimeShow_time(&set_stimestructureget,buffer_menu);
-			//RTC_TimeShow(&set_RtcHandle,buffer_menu);
 			lcd_setCharPos(1,10);
 			lcd_printString(buffer_menu);
 #ifdef DEBUG
@@ -169,7 +210,7 @@ void display_menu(menu_item_t* display_menu) {
 				}
 		case (date):
 				{
-			RTC_DateShow(&set_RtcHandle,buffer_menu);
+			RTC_DateShow_date(&set_datestruct,buffer_menu);
 			lcd_setCharPos(1,10);
 			lcd_printString(buffer_menu);
 			break;

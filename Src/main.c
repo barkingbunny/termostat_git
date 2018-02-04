@@ -175,7 +175,7 @@ int main(void)
 	lcd_setCharPos(0,0);
 	lcd_printString("Initialization unit\r");
 	lcd_printString("termostat_git\r");
-	lcd_printString( "SW v 0.210");
+	lcd_printString( "SW v 0.212");
 	HAL_TIM_Encoder_Start(&htim22,TIM_CHANNEL_1);
 
 	htim22.Instance->EGR = 1;           // Generate an update event
@@ -510,6 +510,7 @@ int main(void)
   	2) Cteni tlacitek by se melo provadet pokazde a po stisknuti by se melo dalsi cteni oddalit na delsi cas - 200-300 ms?
 		 *
 		 */
+
 		/* *------ TIME ELAPSING CHECK -------* */
 		actual_HALtick = HAL_GetTick();
 		if(heating_compare <= actual_HALtick) //measure after defined periode.
