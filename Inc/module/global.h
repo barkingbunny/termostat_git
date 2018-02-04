@@ -8,6 +8,9 @@
 #ifndef MODULE_GLOBAL_H_
 #define MODULE_GLOBAL_H_
 
+// tato promena urcuje, ze kod se bude prekladat se vsim co je v DEBUG modu
+#define DEBUG
+
 #include "stm32l0xx_hal.h"
 
 typedef enum {FALSE = 0u, TRUE = 1u} Bool;

@@ -168,7 +168,7 @@ int _putc(uint8_t value){
     return value;
 }
 
-void lcd_printString( char * str2prt)
+void lcd_printString(char* str2prt)
 {
     uint8_t c;
     for (c=0; c<strlen(str2prt); c++)

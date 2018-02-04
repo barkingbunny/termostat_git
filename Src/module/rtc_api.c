@@ -42,7 +42,13 @@ void RTC_TimeDateShow(RTC_HandleTypeDef* RtcHandle, char* showtime)
 
 uint8_t RTC_setTime(RTC_HandleTypeDef* RtcHandle, uint16_t newTime){
 	// time is declarated in minutes (with hours)
-
-
 	return 0;
 }
+
+void RTC_TimeShow_time(RTC_TimeTypeDef* stimestructureget, char* showtime)
+{
+ // RTC_TimeTypeDef stimestructureget;
+  /* Display time Format : hh:mm:ss */
+  sprintf((char*)showtime,"%02d:%02d:%02d",stimestructureget->Hours, stimestructureget->Minutes, stimestructureget->Seconds);
+}
+
