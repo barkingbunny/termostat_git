@@ -1,0 +1,14 @@
+
+# Settin AC6 for quick flashing the micro controller with cheap STlink v2
+
+The Hardware reset somhow doesn't work, that it is neccesary to change the settings to soft reset
+
+However, the latest version of Ac6 SW for STM32 I started to work with offers the easiest option to set the software system reset. Go to the menu
+
+Run->Debug Configuration
+
+In the tab “Debug” in “Configuration Script” press the button “Show Generator Options...”.
+There change “Hardware Reset” to “Software System Reset”. This will automatically change the line in .cfg script to “reset_config none”.
+Press Apply and Close. 
+
+# 

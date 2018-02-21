@@ -92,6 +92,10 @@ int8_t en_count=0;
 int32_t temperature=-20000;
 int32_t humid = -5;
 uint32_t presure = 0;
+// LOG init start
+int32_t log_temperature[LOG_ARRAY];
+int32_t log_humid[LOG_ARRAY];
+uint8_t log_hour[LOG_ARRAY], log_min[LOG_ARRAY];
 
 // Temp_seting and driving
 uint32_t temperature_set=2000;
@@ -140,7 +144,18 @@ int main(void)
 	uint16_t diagnostics;
 
 	char aShowTime[50] = {0};
+	//LOG pole
+	uint16_t pole;
 
+	//init pole
+	for (pole=0; pole<LOG_ARRAY; pole++) {
+		log_hour[pole]=0;
+		log_min[pole]=0;
+
+		log_temperature[pole]=-500;
+		log_humid[pole]=-500;
+	}
+	// LOG init end
 
 	//debug
 	uint8_t beta2_part=12;
@@ -148,7 +163,7 @@ int main(void)
 	//debug
 
 	//timeouts
-	uint32_t backlite_compare, measure_compare, led_compare,time_compare, button_compare, heating_compare,logging_compare, show_timeout;
+	uint32_t backlite_compare, measure_compare, led_compare,time_compare, button_compare, heating_compare,logging_compare, show_timeout, heating_instant_timeout;
 
 	/* USER CODE END Init */
 
@@ -175,7 +190,7 @@ int main(void)
 	lcd_setCharPos(0,0);
 	lcd_printString("Initialization unit\r");
 	lcd_printString("termostat_git\r");
-	lcd_printString( "SW v 0.212");
+	lcd_printString( "SW v 0.215");
 	HAL_TIM_Encoder_Start(&htim22,TIM_CHANNEL_1);
 
 	htim22.Instance->EGR = 1;           // Generate an update event
@@ -198,8 +213,9 @@ int main(void)
 	time_compare = fill_comparer(TIME_PERIODE);
 	button_compare = fill_comparer(BUT_DELAY);
 	heating_compare = fill_comparer(10); // check it immediately
-	logging_compare = fill_comparer(LOG_PERIODE); // check it immediately
+	logging_compare = fill_comparer_seconds(LOG_PERIODE); // check it immediately
 	show_timeout = 0xfffffffe;
+	heating_instant_timeout = 0;
 
 	HAL_GPIO_WritePin(D_LCD_LIGHT_GPIO_Port,D_LCD_LIGHT_Pin,GPIO_PIN_SET);
 	backlite_compare = fill_comparer(BACKLITE_TIMEOUT);
@@ -328,25 +344,29 @@ int main(void)
 			{
 				if (flags.heating_up) // if the heater is turned on, keep continue with heating.
 				{
-					OUT1_Set;
-					Led1Set;
+					turnOnHeater(temperature);
 				}
 				else
 				{	// when the heater is not active, wait until the temperature fall below threshold-Hysteresis
 					if (temperature < (temperature_set-HEATING_HYSTERESIS))
 					{
 						flags.heating_up = TRUE;
-						OUT1_Set;
-						Led1Set;
+						turnOnHeater(temperature);
 					}
 				}
 			}// end-if (flags.regulation_temp&(temperature < temperature_set))
 			else // vypni topeni
 			{
-				OUT1_Clear;
-				Led1Clear;
-
+				if (flags.heating_instant){
+					if(heating_instant_timeout > actual_HALtick)
+						turnOnHeater(temperature);
+					else
+						flags.heating_instant=FALSE;
+				}
+				else {
+				turnOffHeater();
 				flags.heating_up = FALSE;
+				}
 			}
 			heating_compare = fill_comparer(HEATING_PERIODE);
 			current_state = IDLE;
@@ -360,6 +380,26 @@ int main(void)
 				//	diagnostics =  x;
 
 				//Log_Data(&hrtc,temperature,humid, presure, diagnostics);
+
+				logging_compare = fill_comparer_seconds(LOG_PERIODE);
+
+				// silena prasarna - casem vymazat
+				RTC_TimeTypeDef log_stimestructureget;
+
+				  /* Get the RTC current Time */
+				  HAL_RTC_GetTime(&hrtc, &log_stimestructureget, RTC_FORMAT_BIN);
+				log_hour[pole]=log_stimestructureget.Hours;
+				log_min[pole]=log_stimestructureget.Hours;
+
+				log_temperature[pole]=temperature;
+				log_humid[pole]=humid;
+
+				pole++;
+				if (pole>LOG_ARRAY)
+					pole = 0;
+
+				// silena prasarna///
+
 
 			}
 
@@ -400,6 +440,12 @@ int main(void)
 				if(!flags.regulation_temp)
 					lcd_printString("-");
 				else _putc(0x07f);
+
+				lcd_setCharPos(4,19);
+				if(!flags.heating_instant)
+					lcd_printString(" ");
+				else _putc(0x07f);
+
 				// END Marking - heating is active/not active
 
 				char_magnitude(1);
@@ -513,6 +559,10 @@ int main(void)
 
 		/* *------ TIME ELAPSING CHECK -------* */
 		actual_HALtick = HAL_GetTick();
+		if(logging_compare <= actual_HALtick) //log data after defined periode.
+		{
+			current_state = LOG;
+		}
 		if(heating_compare <= actual_HALtick) //measure after defined periode.
 		{
 			current_state = HEATING;
@@ -587,15 +637,10 @@ int main(void)
 		// -- BUTTON PROCCESS
 		switch (pushed_button){
 		case BUT_1:
-		{// Activate Menu
-			flags.menu_activate=1;
-			en_count = 0;
-			en_count_last=0;
-			htim22.Instance->CNT= 0;
-			activation_memu();
+		{// Immediattely heating for 15 minutes
 
-			lcd_clear();
-			//HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFE);
+			flags.heating_instant = TRUE;
+			heating_instant_timeout = fill_comparer_seconds(HEATING_INSTANT);
 			break;
 		}
 		case BUT_2:
@@ -616,9 +661,16 @@ int main(void)
 		}
 		case BUT_ENC:
 		{
-
-
-
+			if (0 == flags.menu_running){
+				flags.menu_activate=1;
+				en_count = 0;
+				en_count_last=0;
+				htim22.Instance->CNT= 0;
+				activation_memu();
+				lcd_clear();
+				// if this command means go to menu, That there shouldn't be no more pressed.
+				pushed_button = BUT_NONE;
+			}
 			break;
 		}
 		} // switch pushed button

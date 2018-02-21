@@ -49,6 +49,7 @@ typedef struct {
 // regulation of the temperature
 	uint8_t regulation_temp:1; // Signal when regulation of temp is enabled.
 	uint8_t heating_up:1; // record that heating is UP
+	uint8_t heating_instant:1; // heating instant - heating up for defined time period.
 	uint8_t regulation_disabled:1;
 	uint8_t log_enabled:1;
 	uint8_t log_requsition:1;
@@ -64,9 +65,14 @@ typedef struct {
 #define LED_PERIODE 500 //
 #define TIME_PERIODE 400 // ms/ definition of periode for checking time change (RTC change )
 #define HEATING_PERIODE 1000 // every 5 minute check for change - turn on / off heater
-#define LOG_PERIODE 3000 // every 5 minute check for change - turn on / off heater
+#define LOG_PERIODE 300 // in seconds - every 5 minute check for change - turn on / off heater
+#define HEATING_INSTANT 900 // in seconds for 15 minutes is turned on the instant heating
 
 #define HEATING_HYSTERESIS 100 // hysteresis is 1 deg C ( X/100)
+
+#define TEMPERATURE_MAX 3000 // 30.00C maximum temperature, when this limit is reached, the radiator will stop.
+
+#define LOG_ARRAY 400 // number of the logged samples
 
 extern Flags_main flags;
 

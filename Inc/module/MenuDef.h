@@ -19,9 +19,11 @@
 const menu_item_t MainMenu;
 const menu_item_t setTime;
 const menu_item_t setTemp;
+const menu_item_t extUSB;
 //TIME submenus
 const menu_item_t setDate;
 const menu_item_t setClock;
+
 /*
  * uint8_t *menuHeader;
 	uint8_t numberOfChoices;
@@ -34,8 +36,8 @@ const menu_item_t setClock;
 // MAIN MENU - root
 const menu_item_t MainMenu = {
 		"MENU",
-		2,
-		{&setTime,&setTemp},
+		3,
+		{&setTemp,&setTime,&extUSB},
 		NULL,
 		next
 };
@@ -55,6 +57,13 @@ const menu_item_t setTemp = {
 		&MainMenu,
 		setTemperature
 };
+const menu_item_t extUSB = {
+		"USB PRINT",
+		0,
+		{NULL},
+		&MainMenu,
+		usbPrint
+};
 
 /* submenu for TIME */
 
@@ -73,4 +82,5 @@ const menu_item_t setDate = {
 		&setTime,
 		date
 };
+
 #endif /* MODULE_MENUDEF_H_ */

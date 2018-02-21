@@ -14,15 +14,17 @@
 #include "tim.h"
 #include "rtc_api.h"
 #include "rtc.h"
+#include "usb_device.h"
 
 #define MAX_MENU_ITEM 5
 #define MAX_CHAR_LENGHT 12
 #define MENU_TIMOUT 10000 // x second
 
-typedef enum {
+typedef enum EnSetMenu_t{
 	clock,
 	date,
 	setTemperature,
+	usbPrint,
 	next
 } EnSetMenu;
 
@@ -39,6 +41,10 @@ extern uint32_t temperature_set;
 extern Buttons pushed_button;
 extern int8_t en_count;
 extern int32_t temperature;
+// LOG init start
+extern int32_t log_temperature[LOG_ARRAY];
+extern int32_t log_humid[LOG_ARRAY];
+extern uint8_t log_hour[LOG_ARRAY], log_min[LOG_ARRAY];
 
 
 uint8_t menu_action();

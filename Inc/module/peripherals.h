@@ -23,6 +23,8 @@ typedef enum {	BUT_NONE,
 enum {LED1 = 0,LED2};
 void togleLED(uint8_t led);
 Buttons checkButtons(void);
+uint8_t turnOnHeater(uint32_t temperature);
+void turnOffHeater(void);
 
 //encoder constant
 //#define ENCODER_HALF 128

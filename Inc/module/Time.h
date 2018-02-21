@@ -9,5 +9,6 @@
 #define MODULE_TIME_H_
 
 uint32_t fill_comparer (uint16_t periode);
+uint32_t fill_comparer_seconds(uint16_t periode);
 
 #endif /* MODULE_TIME_H_ */

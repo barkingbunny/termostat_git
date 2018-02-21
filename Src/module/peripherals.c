@@ -45,6 +45,26 @@ void togleLED(uint8_t led)
 	}
 }
 
+uint8_t turnOnHeater(uint32_t temperature)
+{
+	if (TEMPERATURE_MAX>temperature)
+	{
+		OUT1_Set;
+		Led1Set;
+	}
+
+	else
+	{
+		turnOffHeater();
+	}
+	return 0;
+}
+
+void turnOffHeater(void){
+	OUT1_Clear;
+	Led1Clear;
+}
+
 /*
 void toggleLED(const uint8_t led){
 

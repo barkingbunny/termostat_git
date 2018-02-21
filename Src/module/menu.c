@@ -5,8 +5,8 @@
  *      Author: jakub
  */
 
-#include "menu.h"
 #include "MenuDef.h"
+#include "menu.h"
 #include "rtc_api.h" // for working with RTC
 
 menu_item_t* ActualMenu;
@@ -167,7 +167,31 @@ uint8_t menu_action(){
 
 				en_count=0;
 				break;
-					}
+						}
+			case (usbPrint):
+						{
+				char buffer_menu [32];
+				lcd_clear();
+				lcd_setCharPos(1,1);
+				snprintf(buffer_menu, 12, "Vypisuji na USB");
+				lcd_printString(buffer_menu);
+
+				snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
+				CDC_Transmit_FS(buffer_menu,5);
+				snprintf(buffer_menu, 32, "i; hours; min; temp; humid\r\n");
+				CDC_Transmit_FS(buffer_menu,32);
+
+				for (uint16_t i=0; i<LOG_ARRAY; i++) {
+					snprintf(buffer_menu, 32, "%i;%02i;%02i;%2d.%02d;%2d.%02d\r\n", i, log_hour[i],log_min[i],log_temperature[i]/100, log_temperature[i]%100, (log_humid[i]/ 1024), (log_humid[i]%1024*100/1024));
+					CDC_Transmit_FS(buffer_menu,32);
+
+				}
+				flags.menu_running=0;
+				lcd_clear();
+				return 0; //exit menu
+
+				break;
+						}
 
 			}
 
