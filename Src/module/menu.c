@@ -13,7 +13,7 @@ menu_item_t* ActualMenu;
 uint32_t menu_compare;
 int8_t position=0, position_x=0;
 int8_t EN_count=-1;
-uint32_t set_temperature=2000;
+int32_t set_temperature=2000;
 RTC_TimeTypeDef set_stimestructureget;
 RTC_HandleTypeDef set_RtcHandle;
 RTC_DateTypeDef set_datestruct;
@@ -35,7 +35,7 @@ uint8_t activation_memu(){
 uint8_t menu_action(){
 	lcd_setCharPos(7,0);
 	char buffer_s [32];
-		snprintf(buffer_s, 12, "; enc%03i", (en_count));
+		snprintf(buffer_s, 12, "enc%03i", (en_count));
 		lcd_printString(buffer_s);
 
 	if (flags.enc_changed) // move by encoder was detected - action on displai
@@ -78,7 +78,6 @@ uint8_t menu_action(){
 						case (clock):
 								{
 							HAL_RTC_GetTime(&hrtc, &set_stimestructureget, RTC_FORMAT_BIN);
-							//HAL_RTC_SetTime(&set_RtcHandle, &set_stimestructureget, RTC_FORMAT_BIN);
 							position_x=0;
 							break;
 								} // end case CLOCK
@@ -256,19 +255,26 @@ void display_menu(menu_item_t* display_menu) {
 					lcd_printString(buffer_menu);
 
 					set_temperature = temperature_set+en_count*50;
+					if (set_temperature > TEMPERATURE_MAX) // if the chosen temperature is higher than maximum allowed temperature
+					{
+						set_temperature = TEMPERATURE_MAX;
+						en_count= (set_temperature-temperature_set)/50; // calculate how much it should be at temp max
+					}
+					if (set_temperature < TEMPERATURE_MIN) // if the chosen temperature is lower than minimum allowed temperature
+					{
+						set_temperature = TEMPERATURE_MIN;
+						en_count= (set_temperature-temperature_set)/50;
 
-					lcd_setCharPos(5,4);
+					}
+					lcd_setCharPos(5,3);
 					char_magnitude(2);
-					snprintf(buffer_menu, 12, "%2d.%02d C",set_temperature/100,set_temperature%100);
+					snprintf(buffer_menu, 12, "%3ld.%02ld C ",set_temperature/100,abs(set_temperature%100));
 					lcd_printString(buffer_menu);
 					char_magnitude(1);
 #ifdef DEBUG
 	// for debuf purpouses, delete after debuging ended
 
-					lcd_setCharPos(7,6);
-					snprintf(buffer_menu, 12, "  enc%03i", (en_count));
-					lcd_printString(buffer_menu);
-					// just for debug reason
+
 #endif
 				}
 			}

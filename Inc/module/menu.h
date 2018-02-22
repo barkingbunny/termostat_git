@@ -37,7 +37,7 @@ typedef struct menu_item_s{
 }menu_item_t;
 
 extern menu_item_t* ActualMenu;
-extern uint32_t temperature_set;
+extern int32_t temperature_set;
 extern Buttons pushed_button;
 extern int8_t en_count;
 extern int32_t temperature;
@@ -48,7 +48,7 @@ extern uint8_t log_hour[LOG_ARRAY], log_min[LOG_ARRAY];
 
 
 uint8_t menu_action();
-void display_menu(menu_item_t* display_menu);
+void display_menu(menu_item_t* display_menu, int date);
 Bool menu_timout();
 uint8_t activation_memu();
 

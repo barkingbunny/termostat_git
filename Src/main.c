@@ -98,7 +98,7 @@ int32_t log_humid[LOG_ARRAY];
 uint8_t log_hour[LOG_ARRAY], log_min[LOG_ARRAY];
 
 // Temp_seting and driving
-uint32_t temperature_set=2000;
+int32_t temperature_set=2000;
 // END Temp_seting and driving
 
 Buttons pushed_button; //cleared each main cycle
@@ -158,7 +158,6 @@ int main(void)
 	// LOG init end
 
 	//debug
-	uint8_t beta2_part=12;
 	Bool beta_part=0, show_time=TRUE;
 	//debug
 
@@ -190,7 +189,7 @@ int main(void)
 	lcd_setCharPos(0,0);
 	lcd_printString("Initialization unit\r");
 	lcd_printString("termostat_git\r");
-	lcd_printString( "SW v 0.215");
+	lcd_printString( "SW v 0.216");
 	HAL_TIM_Encoder_Start(&htim22,TIM_CHANNEL_1);
 
 	htim22.Instance->EGR = 1;           // Generate an update event
@@ -340,32 +339,36 @@ int main(void)
 		 */
 		case HEATING:
 		{
-			if (flags.regulation_temp & (temperature < temperature_set))
-			{
-				if (flags.heating_up) // if the heater is turned on, keep continue with heating.
-				{
+			if (flags.heating_instant){
+				if(heating_instant_timeout > actual_HALtick)
 					turnOnHeater(temperature);
-				}
 				else
-				{	// when the heater is not active, wait until the temperature fall below threshold-Hysteresis
-					if (temperature < (temperature_set-HEATING_HYSTERESIS))
+					flags.heating_instant=FALSE;
+			}
+			else{
+				if (flags.regulation_temp & (temperature < temperature_set))
+				{
+					if (flags.heating_up) // if the heater is turned on, keep continue with heating.
 					{
-						flags.heating_up = TRUE;
 						turnOnHeater(temperature);
 					}
-				}
-			}// end-if (flags.regulation_temp&(temperature < temperature_set))
-			else // vypni topeni
-			{
-				if (flags.heating_instant){
-					if(heating_instant_timeout > actual_HALtick)
-						turnOnHeater(temperature);
 					else
-						flags.heating_instant=FALSE;
-				}
-				else {
-				turnOffHeater();
-				flags.heating_up = FALSE;
+					{	// when the heater is not active, wait until the temperature fall below threshold-Hysteresis
+						if (temperature < (temperature_set-HEATING_HYSTERESIS))
+						{
+							flags.heating_up = TRUE;
+							turnOnHeater(temperature);
+						}
+					}
+				}// end-if (flags.regulation_temp&(temperature < temperature_set))
+
+				else // vypni topeni
+				{
+
+
+					turnOffHeater();
+					flags.heating_up = FALSE;
+
 				}
 			}
 			heating_compare = fill_comparer(HEATING_PERIODE);
@@ -426,13 +429,13 @@ int main(void)
 		{// showing main screen - temperatures and Hum
 			if (flags.new_data_to_show==TRUE){
 				// BME280 sensor
-				lcd_setCharPos(1,4);
+				lcd_setCharPos(1,3);
 				char_magnitude(2);
-				snprintf(buffer_s, 12, "%2d.%02d C",temperature/100,temperature%100);
+				snprintf(buffer_s, 12, "%3ld.%02d C",temperature/100,abs(temperature%100));
 				lcd_printString(buffer_s);
 
-				lcd_setCharPos(4,4);
-				snprintf(buffer_s, 14, "%2d.%02d %%",(humid / 1024), humid%1024*100/1024);
+				lcd_setCharPos(4,3);
+				snprintf(buffer_s, 14, "%3ld.%02ld %%",(humid / 1024), humid%1024*100/1024);
 				lcd_printString(buffer_s);
 
 				// Marking - heating is active/not active
@@ -451,7 +454,7 @@ int main(void)
 				char_magnitude(1);
 
 				lcd_setCharPos(3,2);
-				snprintf(buffer_s, 12, "set %2d.%02d C",temperature_set/100,temperature_set%100);
+				snprintf(buffer_s, 12, "set %3ld.%02d C",temperature_set/100,abs(temperature_set%100));
 				lcd_printString(buffer_s);
 
 				/*	lcd_setCharPos(6,4);
@@ -459,7 +462,7 @@ int main(void)
   					lcd_printString(buffer_s);
 				 */
 				lcd_setCharPos(6,0);
-				snprintf(buffer_s, 20, "%d - %d.%02d V",InputVoltage,InputVoltage*66/2550,(InputVoltage*66%2550*100/255) );
+				snprintf(buffer_s, 13, "%lu-> %lu.%02luV",InputVoltage,InputVoltage*66/2550,(InputVoltage*66%2550*100/255)/10 );// get two numbers for voltage
 				lcd_printString(buffer_s);
 
 				flags.new_data_to_show=FALSE; // the data was showed.
@@ -469,15 +472,15 @@ int main(void)
 			if (show_time){
 
 				RTC_DateShow(&hrtc,aShowTime);
-				lcd_setCharPos(7,10);
+				lcd_setCharPos(0,11);
 				lcd_printString(aShowTime);
 				RTC_TimeShow(&hrtc,aShowTime);
 				//lcd_setCharPos(0,12);
 				lcd_setCharPos(0,1);
 				lcd_printString(aShowTime);
 
-				//debug
-				lcd_setCharPos(0,20);
+#ifdef DEBUG	//debug
+				lcd_setCharPos(3,20);
 				if (beta_part){
 					lcd_printString("T");
 					beta_part = FALSE;
@@ -488,10 +491,19 @@ int main(void)
 				}
 
 				lcd_setCharPos(7,0);
-				snprintf(buffer_s, 18, "%d",hrtc.Instance->TR);
+				snprintf(buffer_s, 9, "%ld;",hrtc.Instance->TR);
 				lcd_printString(buffer_s);
-				//debug
 
+				lcd_setCharPos(7,9);
+				snprintf(buffer_s, 13, "sys%8ld;",actual_HALtick);
+				lcd_printString(buffer_s);
+
+				lcd_setCharPos(6,12);
+				snprintf(buffer_s, 10, "%8ld;",backlite_compare);
+				lcd_printString(buffer_s);
+
+				//debug
+#endif
 				// end of the time part - new timer set.
 				time_compare = fill_comparer(TIME_PERIODE);
 				show_time = FALSE;
@@ -524,7 +536,7 @@ int main(void)
 			uint32_t sekundy = (SlaveCounter << 16)/1000000;
 
 			lcd_setCharPos(4,1);
-			snprintf(buffer_s, 20, "%03d:%02d", sekundy/60,sekundy%60 );
+			snprintf(buffer_s, 20, "%03lu:%02lu", sekundy/60,sekundy%60 );
 			lcd_printString(buffer_s);
 
 			// reading the actual number from encoder
@@ -673,6 +685,16 @@ int main(void)
 			}
 			break;
 		}
+		case ENCODER:
+		{
+			break;
+		}
+		default:
+		{
+
+			break;
+		}
+
 		} // switch pushed button
 
 		HAL_Delay(MAIN_LOOP);
