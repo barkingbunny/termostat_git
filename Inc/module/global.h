@@ -73,7 +73,7 @@ typedef struct {
 #define TEMPERATURE_MAX 3000 // 30.00C maximum temperature, when this limit is reached, the radiator will stop.
 #define TEMPERATURE_MIN -1000 //-10.00C maximum temperature, when this limit is reached, the radiator will stop.
 
-#define LOG_ARRAY 400 // number of the logged samples
+#define LOG_ARRAY 50 // number of the logged samples
 
 extern Flags_main flags;
 

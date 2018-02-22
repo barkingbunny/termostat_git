@@ -65,6 +65,9 @@
  * Ukoly:
  * pridej MENU, s nastavenim casu a teplot. funkcni
  * pridej logovaci funkci.
+ *
+ * USB*
+ * nastveni - 115200-8-N-1, /dev/ttyACM0
  */
 
 #include "pinmap.h"
@@ -139,9 +142,8 @@ int main(void)
 
 	uint32_t actual_HALtick=0;
 	uint32_t InputVoltage=0;
-	int8_t en_count_last=0;
+	uint8_t en_count_last=0;
 	int16_t count1;
-	uint16_t diagnostics;
 
 	char aShowTime[50] = {0};
 	//LOG pole
@@ -153,8 +155,9 @@ int main(void)
 		log_min[pole]=0;
 
 		log_temperature[pole]=-500;
-		log_humid[pole]=-500;
+		log_humid[pole]=0;
 	}
+	pole=0;
 	// LOG init end
 
 	//debug
@@ -189,13 +192,16 @@ int main(void)
 	lcd_setCharPos(0,0);
 	lcd_printString("Initialization unit\r");
 	lcd_printString("termostat_git\r");
-	lcd_printString( "SW v 0.216");
+	lcd_printString( "SW v 0.218");
 	HAL_TIM_Encoder_Start(&htim22,TIM_CHANNEL_1);
 
 	htim22.Instance->EGR = 1;           // Generate an update event
 	htim22.Instance->CR1 = 1;           // Enable the counter
 
 	BME280_init(&hi2c1,DEFAULT_SLAVE_ADDRESS); // initialization of temp/humid sensor BOSH
+
+	sprintf(buffer_usb, "Hello World, ahha123456");
+	CDC_Transmit_FS(buffer_usb,25);
 
 	HAL_Delay(1700);
 	lcd_clear();
@@ -380,20 +386,13 @@ int main(void)
 		{
 			if (flags.log_enabled)
 			{
-				//	diagnostics =  x;
-
-				//Log_Data(&hrtc,temperature,humid, presure, diagnostics);
-
-				logging_compare = fill_comparer_seconds(LOG_PERIODE);
-
 				// silena prasarna - casem vymazat
 				RTC_TimeTypeDef log_stimestructureget;
 
-				  /* Get the RTC current Time */
-				  HAL_RTC_GetTime(&hrtc, &log_stimestructureget, RTC_FORMAT_BIN);
+				/* Get the RTC current Time */
+				HAL_RTC_GetTime(&hrtc, &log_stimestructureget, RTC_FORMAT_BIN);
 				log_hour[pole]=log_stimestructureget.Hours;
-				log_min[pole]=log_stimestructureget.Hours;
-
+				log_min[pole]=log_stimestructureget.Minutes;
 				log_temperature[pole]=temperature;
 				log_humid[pole]=humid;
 
@@ -403,7 +402,7 @@ int main(void)
 
 				// silena prasarna///
 
-
+				logging_compare = fill_comparer_seconds(LOG_PERIODE);
 			}
 
 			break;
@@ -489,11 +488,11 @@ int main(void)
 					lcd_printString("-");
 					beta_part = TRUE;
 				}
-
+/* Time of the working the unit.
 				lcd_setCharPos(7,0);
 				snprintf(buffer_s, 9, "%ld;",hrtc.Instance->TR);
 				lcd_printString(buffer_s);
-
+*/
 				lcd_setCharPos(7,9);
 				snprintf(buffer_s, 13, "sys%8ld;",actual_HALtick);
 				lcd_printString(buffer_s);
@@ -630,9 +629,10 @@ int main(void)
 			button_compare = fill_comparer(BUT_DELAY);
 			//flags.enc_changed = FALSE;
 			// reading the actual number from encoder
-			if (en_count_last != htim22.Instance->CNT){
-				en_count+=htim22.Instance->CNT-en_count_last;
-				en_count_last=htim22.Instance->CNT;
+			uint32_t actual_counter_CNT = htim22.Instance->CNT;
+			if (en_count_last != actual_counter_CNT){
+				en_count+= actual_counter_CNT-en_count_last;
+				en_count_last=actual_counter_CNT;
 				flags.enc_changed = TRUE;
 				if (pushed_button == BUT_NONE) // enabling light/ increase time constants.
 					pushed_button = ENCODER;

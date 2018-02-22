@@ -8,6 +8,7 @@
 #include "MenuDef.h"
 #include "menu.h"
 #include "rtc_api.h" // for working with RTC
+//#include "usbd_cdc_if.h"
 
 menu_item_t* ActualMenu;
 uint32_t menu_compare;
@@ -177,13 +178,13 @@ uint8_t menu_action(){
 
 				snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
 				CDC_Transmit_FS(buffer_menu,5);
-				snprintf(buffer_menu, 32, "i; hours; min; temp; humid\r\n");
+				snprintf(buffer_menu, 30, "i; hours; min; temp; humid\r\n");
 				CDC_Transmit_FS(buffer_menu,32);
-
-				for (uint16_t i=0; i<LOG_ARRAY; i++) {
-					snprintf(buffer_menu, 32, "%i;%02i;%02i;%2d.%02d;%2d.%02d\r\n", i, log_hour[i],log_min[i],log_temperature[i]/100, log_temperature[i]%100, (log_humid[i]/ 1024), (log_humid[i]%1024*100/1024));
-					CDC_Transmit_FS(buffer_menu,32);
-
+				snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
+				CDC_Transmit_FS(buffer_menu,5);
+				for (uint16_t index=0; index<LOG_ARRAY; index++) {
+					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));
+					CDC_Transmit_FS(buffer_menu,25);
 				}
 				flags.menu_running=0;
 				lcd_clear();
@@ -251,7 +252,7 @@ void display_menu(menu_item_t* display_menu) {
 
 					lcd_setCharPos(3,0);
 					char_magnitude(1);
-					snprintf(buffer_menu, 21, "%Set temperature");
+					snprintf(buffer_menu, 16, "Set temperature");
 					lcd_printString(buffer_menu);
 
 					set_temperature = temperature_set+en_count*50;
@@ -268,7 +269,7 @@ void display_menu(menu_item_t* display_menu) {
 					}
 					lcd_setCharPos(5,3);
 					char_magnitude(2);
-					snprintf(buffer_menu, 12, "%3ld.%02ld C ",set_temperature/100,abs(set_temperature%100));
+					snprintf(buffer_menu, 12, "%3ld.%02d C ",set_temperature/100,abs(set_temperature%100));
 					lcd_printString(buffer_menu);
 					char_magnitude(1);
 #ifdef DEBUG

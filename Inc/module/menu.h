@@ -48,7 +48,7 @@ extern uint8_t log_hour[LOG_ARRAY], log_min[LOG_ARRAY];
 
 
 uint8_t menu_action();
-void display_menu(menu_item_t* display_menu, int date);
+void display_menu(menu_item_t* display_menu);
 Bool menu_timout();
 uint8_t activation_memu();
 
