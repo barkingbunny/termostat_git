@@ -10,10 +10,10 @@
 ]>
 
 <targetDefinitions>
-  <board id="termostat_git">
-    <name>Termostat_git</name>
-    <dbgIF>SWD</dbgIF>
-    <dbgDEV>ST-Link</dbgDEV>
-    <mcuId>stm32l072rbtx</mcuId>
-  </board>
+	<board id="termostat_git">
+		<name>Termostat_git</name>
+		<dbgIF>SWD</dbgIF>
+		<dbgDEV>ST-Link</dbgDEV>
+		<mcuId>stm32l072rbtx</mcuId>
+	</board>
 </targetDefinitions>

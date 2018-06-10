@@ -60,6 +60,8 @@
 /* USER CODE BEGIN Includes */
 
 /**popis
+ *
+ * - prehozena tlacitka tl1 a tl2
  * Tento program je zkopirovan z termostat001.
  *
  * Ukoly:
@@ -192,7 +194,7 @@ int main(void)
 	lcd_setCharPos(0,0);
 	lcd_printString("Initialization unit\r");
 	lcd_printString("termostat_git\r");
-	lcd_printString( "SW v 0.218");
+	lcd_printString( "SW v 0.219");
 	HAL_TIM_Encoder_Start(&htim22,TIM_CHANNEL_1);
 
 	htim22.Instance->EGR = 1;           // Generate an update event
@@ -649,13 +651,6 @@ int main(void)
 		// -- BUTTON PROCCESS
 		switch (pushed_button){
 		case BUT_1:
-		{// Immediattely heating for 15 minutes
-
-			flags.heating_instant = TRUE;
-			heating_instant_timeout = fill_comparer_seconds(HEATING_INSTANT);
-			break;
-		}
-		case BUT_2:
 		{// activate heater
 			if (!flags.regulation_temp){
 				flags.regulation_temp=TRUE;
@@ -669,6 +664,13 @@ int main(void)
 			flags.new_data_to_show=TRUE;
 			//	show = debug;
 
+			break;
+		}
+		case BUT_2:
+		{// Immediattely heating for 15 minutes
+
+			flags.heating_instant = TRUE;
+			heating_instant_timeout = fill_comparer_seconds(HEATING_INSTANT);
 			break;
 		}
 		case BUT_ENC:

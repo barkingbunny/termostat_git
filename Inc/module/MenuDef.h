@@ -20,6 +20,7 @@ const menu_item_t MainMenu;
 const menu_item_t setTime;
 const menu_item_t setTemp;
 const menu_item_t extUSB;
+const menu_item_t put_menuReset;
 //TIME submenus
 const menu_item_t setDate;
 const menu_item_t setClock;
@@ -36,8 +37,8 @@ const menu_item_t setClock;
 // MAIN MENU - root
 const menu_item_t MainMenu = {
 		"MENU",
-		3,
-		{&setTemp,&setTime,&extUSB},
+		4,
+		{&setTemp,&setTime,&extUSB,&put_menuReset},
 		NULL,
 		next
 };
@@ -63,6 +64,14 @@ const menu_item_t extUSB = {
 		{NULL},
 		&MainMenu,
 		usbPrint
+};
+
+const menu_item_t put_menuReset = {
+		"RESET",
+		0,
+		{NULL},
+		&MainMenu,
+		menuReset
 };
 
 /* submenu for TIME */

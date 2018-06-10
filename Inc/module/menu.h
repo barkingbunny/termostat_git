@@ -25,7 +25,8 @@ typedef enum EnSetMenu_t{
 	date,
 	setTemperature,
 	usbPrint,
-	next
+	next,
+	menuReset
 } EnSetMenu;
 
 typedef struct menu_item_s{

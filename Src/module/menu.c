@@ -192,6 +192,10 @@ uint8_t menu_action(){
 
 				break;
 						}
+			case (menuReset):
+							{
+
+							}
 
 			}
 
