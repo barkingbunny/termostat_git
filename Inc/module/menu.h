@@ -42,11 +42,6 @@ extern int32_t temperature_set;
 extern Buttons pushed_button;
 extern int8_t en_count;
 extern int32_t temperature;
-// LOG init start
-extern int32_t log_temperature[LOG_ARRAY];
-extern int32_t log_humid[LOG_ARRAY];
-extern uint8_t log_hour[LOG_ARRAY], log_min[LOG_ARRAY];
-
 
 uint8_t menu_action();
 void display_menu(menu_item_t* display_menu);

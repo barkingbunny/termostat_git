@@ -61,8 +61,7 @@
 
 /**popis
  *
- * - prehozena tlacitka tl1 a tl2
- * Tento program je zkopirovan z termostat001.
+ *Pracuji tedkon na logovani
  *
  * Ukoly:
  * pridej MENU, s nastavenim casu a teplot. funkcni
@@ -83,6 +82,7 @@
 #include "Time.h"
 #include "menu.h"
 #include "log.h"
+#include "sleep.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -97,10 +97,6 @@ int8_t en_count=0;
 int32_t temperature=-20000;
 int32_t humid = -5;
 uint32_t presure = 0;
-// LOG init start
-int32_t log_temperature[LOG_ARRAY];
-int32_t log_humid[LOG_ARRAY];
-uint8_t log_hour[LOG_ARRAY], log_min[LOG_ARRAY];
 
 // Temp_seting and driving
 int32_t temperature_set=2000;
@@ -148,19 +144,6 @@ int main(void)
 	int16_t count1;
 
 	char aShowTime[50] = {0};
-	//LOG pole
-	uint16_t pole;
-
-	//init pole
-	for (pole=0; pole<LOG_ARRAY; pole++) {
-		log_hour[pole]=0;
-		log_min[pole]=0;
-
-		log_temperature[pole]=-500;
-		log_humid[pole]=0;
-	}
-	pole=0;
-	// LOG init end
 
 	//debug
 	Bool beta_part=0, show_time=TRUE;
@@ -194,7 +177,7 @@ int main(void)
 	lcd_setCharPos(0,0);
 	lcd_printString("Initialization unit\r");
 	lcd_printString("termostat_git\r");
-	lcd_printString( "SW v 0.219");
+	lcd_printString( "SW v 0.220");
 	HAL_TIM_Encoder_Start(&htim22,TIM_CHANNEL_1);
 
 	htim22.Instance->EGR = 1;           // Generate an update event
@@ -242,62 +225,10 @@ int main(void)
 	{
 		switch (current_state){
 		case SLEEP:
-		{
-			//			neni potreba spanku
-			//
-			//			snprintf(buffer_usb, 15, "SLEEP \n\r");
-			//			CDC_Transmit_FS(buffer_usb,15);
-			//CDC_Transmit_FS(aShowTime,15);
-			//			snprintf(buffer_usb, 15, "\n\r %s \n\r", aShowTime);
-			//			CDC_Transmit_FS(buffer_usb,14);
-			//
-			//			//* Disable all used wakeup sources*/
-			//			HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-			//			//* Re-enable all used wakeup sources*/
-			//			//* ## Setting the Wake up time ############################################*/
-			//			/*  RTC Wakeup Interrupt Generation:
-			//		  				    Wakeup Time Base = (RTC_WAKEUPCLOCK_RTCCLK_DIV /(LSI))
-			//		  				    Wakeup Time = Wakeup Time Base * WakeUpCounter
-			//		  				      = (RTC_WAKEUPCLOCK_RTCCLK_DIV /(LSI)) * WakeUpCounter
-			//		  				      ==> WakeUpCounter = Wakeup Time / Wakeup Time Base
-			//
-			//		  				    To configure the wake up timer to 4s the WakeUpCounter is set to 0x1FFF:
-			//		  				    RTC_WAKEUPCLOCK_RTCCLK_DIV = RTCCLK_Div16 = 16
-			//		  				    Wakeup Time Base = 16 /(~39.000KHz) = ~0,410 ms
-			//		  				    Wakeup Time = ~4s = 0,410ms  * WakeUpCounter
-			//		  				      ==> WakeUpCounter = ~4s/0,410ms = 9750 = 0x2616 */
-			//
-			//			if ( HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 9250, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK)
-			//			{
-			//				lcd_setCharPos(2,1);
-			//				lcd_printString(" ERR - no wake set" );
-			//				HAL_Delay(2500);
-			//			}
-			//			// Clear all related wakeup flags
-			//			__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
-			//
-			//			//*Suspend Tick increment to prevent wakeup by Systick interrupt.Otherwise the Systick interrupt will wake up the device within 1ms (HAL time base)
-			//			HAL_SuspendTick();
-			//
-			//			// Enable Power Control clock
-			//			__HAL_RCC_PWR_CLK_ENABLE();
-			//
-			//			// Enter Sleep Mode , wake up is done once User push-button is pressed
-			//			HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-			//
-			//			// Resume Tick interrupt if disabled prior to sleep mode entry
-			//			HAL_ResumeTick();
-			//
-			//
-			//			snprintf(buffer_usb, 15, "RESUME \n\r");
-			//			CDC_Transmit_FS(buffer_usb,10);
-			//			RTC_TimeShow(&hrtc,aShowTime);
-			//			CDC_Transmit_FS(aShowTime,15);
-			//			snprintf(buffer_usb, 15, "\n\r %s \n\r", aShowTime);
-			//			CDC_Transmit_FS(buffer_usb,14);
-			//
-			//			current_state = MEASURING;
-			//			show_time=TRUE;
+		{//			neni potreba spanku
+			Go_To_Sleep();
+			current_state = MEASURING;
+			show_time=TRUE;
 			break;
 		}
 		case IDLE:
@@ -388,22 +319,7 @@ int main(void)
 		{
 			if (flags.log_enabled)
 			{
-				// silena prasarna - casem vymazat
-				RTC_TimeTypeDef log_stimestructureget;
-
-				/* Get the RTC current Time */
-				HAL_RTC_GetTime(&hrtc, &log_stimestructureget, RTC_FORMAT_BIN);
-				log_hour[pole]=log_stimestructureget.Hours;
-				log_min[pole]=log_stimestructureget.Minutes;
-				log_temperature[pole]=temperature;
-				log_humid[pole]=humid;
-
-				pole++;
-				if (pole>LOG_ARRAY)
-					pole = 0;
-
-				// silena prasarna///
-
+				Log_Temperature(&hrtc, temperature, humid);
 				logging_compare = fill_comparer_seconds(LOG_PERIODE);
 			}
 
