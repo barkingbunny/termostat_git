@@ -27,7 +27,5 @@ uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght);
 
 
 log_item_t log_data[LOG_DATA_LENGTH];
-uint16_t index_log_wr = 0;
-uint16_t index_log_read = 0xfffe;
 
 #endif /* MODULE_LOG_H_ */

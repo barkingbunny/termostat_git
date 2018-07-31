@@ -10,6 +10,6 @@
 
 #include "global.h"
 
-void Go_To_Sleep(void);
+void Go_To_Sleep(RTC_HandleTypeDef* RtcHandle);
 
 #endif /* MODULE_SLEEP_H_ */

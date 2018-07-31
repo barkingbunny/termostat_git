@@ -12,6 +12,9 @@
 #include "stdio.h"
 #include "string.h"
 
+
+uint16_t index_log_wr = 0;
+uint16_t index_log_read = 0xfffe;
 RTC_HandleTypeDef received_time;
 
 uint8_t Log_Data(RTC_HandleTypeDef* RtcHandle, int16_t temperature, int16_t humidity, int16_t pressure, uint16_t diagnostics)
@@ -54,7 +57,7 @@ uint8_t Log_Temperature(RTC_HandleTypeDef* RtcHandle, int32_t temperature, int32
 	int16_t temperature_16 = temperature;
 
 	log_data[index_log_wr].temp_1= temperature_16;
-	log_data[index_log_wr].hum_1 = humidity_16;index_log_read = 0;
+	log_data[index_log_wr].hum_1 = humidity_16;
 	log_data[index_log_wr].time_tr= RtcHandle->Instance->TR;
 	log_data[index_log_wr].date_cr= RtcHandle->Instance->CR;
 
@@ -99,7 +102,7 @@ uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght){
 		RtcHandle->Instance->CR = log_Handle->date_cr;
 		RTC_TimeMark(RtcHandle, TimeMark);
 
-		snprintf(field_of_char, 45, "%s;%d;%d;",TimeMark,log_Handle->temp_1, log_Handle->hum_1);
+		snprintf(field_of_char, 32, "%s;%d;%d;",TimeMark,log_Handle->temp_1, log_Handle->hum_1);
 
 	if (2 == log_read_stat) // if there are more data to read, return 2;
 		return 2;

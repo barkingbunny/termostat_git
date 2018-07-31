@@ -226,7 +226,7 @@ int main(void)
 		switch (current_state){
 		case SLEEP:
 		{//			neni potreba spanku
-			Go_To_Sleep();
+			Go_To_Sleep(&hrtc);
 			current_state = MEASURING;
 			show_time=TRUE;
 			break;

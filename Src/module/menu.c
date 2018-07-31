@@ -182,10 +182,16 @@ uint8_t menu_action(){
 				CDC_Transmit_FS(buffer_menu,32);
 				snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
 				CDC_Transmit_FS(buffer_menu,5);
-				for (uint16_t index=0; index<LOG_ARRAY; index++) {
-					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));
-					CDC_Transmit_FS(buffer_menu,25);
+
+				while(2==Log_To_String(buffer_menu, 32)){
+
+					CDC_Transmit_FS(buffer_menu,32);
 				}
+
+//				for (uint16_t index=0; index<LOG_ARRAY; index++) {
+//					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));
+//					CDC_Transmit_FS(buffer_menu,25);
+//				}
 				flags.menu_running=0;
 				lcd_clear();
 				return 0; //exit menu
