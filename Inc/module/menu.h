@@ -15,6 +15,8 @@
 #include "rtc_api.h"
 #include "rtc.h"
 #include "usb_device.h"
+#include "log.h"
+
 
 #define MAX_MENU_ITEM 5
 #define MAX_CHAR_LENGHT 12

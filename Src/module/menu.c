@@ -173,17 +173,22 @@ uint8_t menu_action(){
 				char buffer_menu [32];
 				lcd_clear();
 				lcd_setCharPos(1,1);
-				snprintf(buffer_menu, 12, "Vypisuji na USB");
+				snprintf(buffer_menu, 16, "Vypisuji na USB");
 				lcd_printString(buffer_menu);
-
+		//debug
+				snprintf(buffer_menu, 16, "Vypisuji na USB");
+				CDC_Transmit_FS(buffer_menu,16);
+		//debug
 				snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
 				CDC_Transmit_FS(buffer_menu,5);
 				snprintf(buffer_menu, 30, "i; hours; min; temp; humid\r\n");
-				CDC_Transmit_FS(buffer_menu,32);
+				CDC_Transmit_FS(buffer_menu,30);
 				snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
 				CDC_Transmit_FS(buffer_menu,5);
 
-				while(2==Log_To_String(buffer_menu, 32)){
+
+
+				while(2 == Log_To_String(&buffer_menu, 32)){
 
 					CDC_Transmit_FS(buffer_menu,32);
 				}
