@@ -73,13 +73,13 @@ return 1;
  */
 uint8_t Log_Read(log_item_t* log_Handle){
 	if (0xfffe == index_log_read) index_log_read=index_log_wr;  // first time, when this function is used.
-uint32_t valid_data_cr = (log_data[index_log_read]->date_cr);
+uint32_t valid_data_cr = (log_data[index_log_read].date_cr);
 	while (0 == valid_data_cr){
 		log_Handle = &log_data[index_log_read];
 		index_log_read++;
 		if (index_log_read >= LOG_DATA_LENGTH)
 			index_log_read = 0;
-		valid_data_cr = (log_data[index_log_read]->date_cr);
+		valid_data_cr = (log_data[index_log_read].date_cr);
 	}
 
 	if (index_log_read != index_log_wr)

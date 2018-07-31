@@ -57,7 +57,7 @@ typedef struct {
 
 }Flags_main;
 
-#define DEBUG 1		// debug of the code is turned ON!
+#define DEBUG 		// debug of the code is turned ON!
 
 #define BUT_DELAY 1		// in milisecond - I want to read it quckly
 #define MAIN_LOOP 25		// in milisecond
