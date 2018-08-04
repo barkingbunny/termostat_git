@@ -66,6 +66,10 @@ typedef struct {
 #define TIME_PERIODE 400 // ms/ definition of periode for checking time change (RTC change )
 #define HEATING_PERIODE 1000 // every 5 minute check for change - turn on / off heater
 #define LOG_PERIODE 300 // in seconds - every 5 minute check for change - turn on / off heater
+#ifdef DEBUG
+	#define LOG_PERIODE 5
+#endif
+
 #define HEATING_INSTANT 900 // in seconds for 15 minutes is turned on the instant heating
 
 #define HEATING_HYSTERESIS 50 // hysteresis is 0.5 deg C ( X/50)

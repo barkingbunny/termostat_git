@@ -22,7 +22,7 @@ typedef struct {
 uint8_t Log_Data(RTC_HandleTypeDef* RtcHandle, int16_t temperature, int16_t humidity, int16_t pressure, uint16_t diagnostics);
 void RTC_TimeMark(RTC_HandleTypeDef* RtcHandle, char* showtime);
 uint8_t Log_Temperature(RTC_HandleTypeDef* RtcHandle, int32_t temperature, int32_t humidity);
-uint8_t Log_Read(log_item_t* log_Handle);
+uint8_t Log_Read(log_item_t log_Handle);
 uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght);
 
 

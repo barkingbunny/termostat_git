@@ -74,11 +74,11 @@ return 1;
  * 2 - there are still data, that were not read.
  *
  */
-uint8_t Log_Read(log_item_t* log_Handle){
+uint8_t Log_Read(log_item_t log_Handle){
 	if (0xfffe == index_log_read) index_log_read=index_log_wr;  // first time, when this function is used.
 uint32_t valid_data_cr = (log_data[index_log_read].date_cr);
 	while (0 == valid_data_cr){
-		log_Handle = &log_data[index_log_read];
+		log_Handle = log_data[index_log_read];
 		index_log_read++;
 		if (index_log_read >= LOG_DATA_LENGTH)
 			index_log_read = 0;
@@ -92,17 +92,26 @@ uint32_t valid_data_cr = (log_data[index_log_read].date_cr);
 	return 1;
 }
 uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght){
-	log_item_t* log_Handle;
+	log_item_t log_Handle;
 	uint8_t log_read_stat= 0;
 	log_read_stat=Log_Read(log_Handle);
-
-		char TimeMark[25] = {0};
+lcd_setCharPos(5,5);
+lcd_printString("1");
+		char TimeMark[25];
 		RTC_HandleTypeDef* RtcHandle;
-		RtcHandle->Instance->TR = log_Handle->time_tr;
-		RtcHandle->Instance->CR = log_Handle->date_cr;
+	lcd_setCharPos(5,6);
+	lcd_printString("2");
+		RtcHandle->Instance->TR = &log_Handle.time_tr;
+		//RtcHandle->Instance->TR = log_Handle->time_tr;
+lcd_setCharPos(5,4);
+lcd_printString("N");
+		RtcHandle->Instance->CR = log_Handle.date_cr;
+		lcd_setCharPos(5,7);
+		lcd_printString("3");
 		RTC_TimeMark(RtcHandle, TimeMark);
-
-		snprintf(field_of_char, 32, "%s;%d;%d;",TimeMark,log_Handle->temp_1, log_Handle->hum_1);
+lcd_setCharPos(5,8);
+lcd_printString("4");
+//		snprintf(&field_of_char, 32, "%s;%d;%d;",TimeMark,log_Handle->temp_1, log_Handle->hum_1);
 
 	if (2 == log_read_stat) // if there are more data to read, return 2;
 		return 2;
