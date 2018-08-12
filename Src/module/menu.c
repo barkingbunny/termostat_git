@@ -182,11 +182,12 @@ uint8_t menu_action(){
 				uint8_t buffer_menu2 [16] = "Vypisuji na USB";
 				char buffer_menu3 [32];
 				//snprintf(buffer_menu, 16, "Vypisuji na USB");
-				post = CDC_Transmit_FS(buffer_menu2,16);
+			/*	post = CDC_Transmit_FS(buffer_menu2,16);
+
 				lcd_setCharPos(0,4);
 				snprintf(buffer_menu, 12, "return %i", post);
 				lcd_printString(buffer_menu);
-
+*/
 				//buffer_menu2 = "\r\n";
 				//CDC_Transmit_FS(buffer_menu2,5);
 				/*snprintf(buffer_menu, 30, "i; hours; min; temp; humid\r\n");
@@ -218,30 +219,25 @@ uint8_t menu_action(){
 
 				uint8_t index_l = 2;
 				post = 2;
+				char buffer_menu4[33];
 				while(2 == post){
-					Led2Set;
-					post=Log_To_String(buffer_menu, 32);
-			lcd_setCharPos(5,9);
-			lcd_printString("5");
-					snprintf(buffer_menu3, 9, "post %d", post);
-					lcd_setCharPos(7,4);
+					post=Log_To_String(&buffer_menu4, 32);
+					lcd_setCharPos(index_l,0);
+					snprintf(buffer_menu3, 8, "P=%d;", post);
 					lcd_printString(buffer_menu3);
 					//post = CDC_Transmit_FS(buffer_menu,32);
 
-						lcd_setCharPos(index_l,1);
-						lcd_printString(buffer_menu);
-						index_l++;
-			lcd_setCharPos(5,10);
-			lcd_printString("6");
-						if (7<index_l++){
-							index_l=0;
-							HAL_Delay(2000);
-						}
+					lcd_printString(buffer_menu4);
+					index_l++;
+					HAL_Delay(5000);
+					if (7<index_l){
+						index_l=1;
+						HAL_Delay(2000);
+						lcd_clear();
+					}
 
 				}
-				Led1Set;
 				HAL_Delay(3000);
-				Led1Clear;
 
 //				for (uint16_t index=0; index<LOG_ARRAY; index++) {
 //					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));

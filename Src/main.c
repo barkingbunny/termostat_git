@@ -70,9 +70,9 @@
  * USB*
  * nastveni - 115200-8-N-1, /dev/ttyACM0
  */
-
 #include "pinmap.h"
 #include "peripherals.h"
+#include "global.h"
 #include "lcd_12864.h"
 #include "BME280.h"
 #include "ds18b20.h"
@@ -177,7 +177,10 @@ int main(void)
 	lcd_setCharPos(0,0);
 	lcd_printString("Initialization unit\r");
 	lcd_printString("termostat_git\r");
-	lcd_printString( "SW v 0.226");
+	snprintf(buffer_s, 11, "SW v 0.%d", SW_VERSION);
+	lcd_printString(buffer_s);
+
+
 	HAL_TIM_Encoder_Start(&htim22,TIM_CHANNEL_1);
 
 	htim22.Instance->EGR = 1;           // Generate an update event
@@ -203,11 +206,11 @@ int main(void)
 	time_compare = fill_comparer(TIME_PERIODE);
 	button_compare = fill_comparer(BUT_DELAY);
 	heating_compare = fill_comparer(10); // check it immediately
-	logging_compare = fill_comparer_seconds(LOG_PERIODE); // check it immediately
+	logging_compare = fill_comparer_seconds(LOG_PERIODE);
 	show_timeout = 0xfffffffe;
 	heating_instant_timeout = 0;
 
-	HAL_GPIO_WritePin(D_LCD_LIGHT_GPIO_Port,D_LCD_LIGHT_Pin,GPIO_PIN_SET);
+	backliteOn();
 	backlite_compare = fill_comparer(BACKLITE_TIMEOUT);
 	// NEW ADDED
 	/*##- 4- Start the conversion process #######################################*/
@@ -321,8 +324,9 @@ int main(void)
 			{
 				Log_Temperature(&hrtc, temperature, humid);
 				logging_compare = fill_comparer_seconds(LOG_PERIODE);
-			}
 
+			}
+			current_state = IDLE;
 			break;
 		}
 		default:
@@ -535,7 +539,7 @@ int main(void)
 		 */
 		if (backlite_compare <= actual_HALtick) // shut down the backligh
 		{
-			HAL_GPIO_WritePin(D_LCD_LIGHT_GPIO_Port,D_LCD_LIGHT_Pin,GPIO_PIN_RESET);
+			backliteOff();
 		}
 
 		/* *---- READ KEYBOARD -----* */
@@ -558,7 +562,7 @@ int main(void)
 		}
 		if(pushed_button != BUT_NONE) // any button pushed?
 		{
-			HAL_GPIO_WritePin(D_LCD_LIGHT_GPIO_Port,D_LCD_LIGHT_Pin,GPIO_PIN_SET);
+			backliteOn();
 			button_compare = fill_comparer(BUT_DELAY*200); // 200x - zpozdeni cteni pri stisknuti
 			backlite_compare = fill_comparer(BACKLITE_TIMEOUT);
 			show_timeout = fill_comparer(SHOW_TIMEOUT);
