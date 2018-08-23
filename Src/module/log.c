@@ -91,10 +91,10 @@ lcd_setCharPos(7,0);
 snprintf(buffer_s, 7, "Log=%i;", index_log_wr);
 lcd_printString(buffer_s);
 lcd_setCharPos(4,0);
-snprintf(buffer_s, 7, "%d;",rtc_time_structure.Minutes);
+snprintf(buffer_s, 7, "%d;",log_data[index_log_wr-1].hum_1);
 lcd_printString(buffer_s);
 lcd_setCharPos(5,0);
-snprintf(buffer_s, 7, "%d;",log_data[index_log_wr-1].year);
+snprintf(buffer_s, 7, "%d;",log_data[index_log_wr-1].temp_1);
 lcd_printString(buffer_s);
 
 //end DEBUG
@@ -117,26 +117,21 @@ lcd_setCharPos(0,0);
 snprintf(buffer_s, 12, "rd=%i;wr%i  ", index_log_read, index_log_wr);
 lcd_printString(buffer_s);
 
-
-	uint32_t valid_data = (log_data[index_log_read].day);
-	while (0 == valid_data){
-
+	while (0 == log_data[index_log_read].day){
 lcd_printString("R");
-
-		//memcpy(log_Handle, log_data[index_log_read], arraysize * sizeof (struct log_item_t));
-		log_Handle->temp_1 = log_data[index_log_read].temp_1;
-		log_Handle->hum_1 = log_data[index_log_read].hum_1;
-		log_Handle->year = log_data[index_log_read].year;
-		log_Handle->month = log_data[index_log_read].month;
-		log_Handle->day = log_data[index_log_read].day;
-		log_Handle->hour = log_data[index_log_read].hour;
-		log_Handle->minute = log_data[index_log_read].minute;
-
 		index_log_read++;
 		if (index_log_read >= LOG_DATA_LENGTH)
 			index_log_read = 0;
-		valid_data = (log_data[index_log_read].day);
 	}
+
+	//memcpy(log_Handle, log_data[index_log_read], arraysize * sizeof (struct log_item_t));
+	log_Handle->temp_1 = log_data[index_log_read-1].temp_1;
+	log_Handle->hum_1 = log_data[index_log_read-1].hum_1;
+	log_Handle->year = log_data[index_log_read-1].year;
+	log_Handle->month = log_data[index_log_read-1].month;
+	log_Handle->day = log_data[index_log_read-1].day;
+	log_Handle->hour = log_data[index_log_read-1].hour;
+	log_Handle->minute = log_data[index_log_read-1].minute;
 
 	if (index_log_read != index_log_wr)
 		return 2;
@@ -144,10 +139,11 @@ lcd_printString("R");
 	index_log_read = 0xfffe;
 	return 1;
 }
+
 uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght){
 	log_item_t log_Handle;
 	uint8_t log_read_stat= 0;
-	char TimeMark[25];
+	char* TimeMark[25];
 
 	log_read_stat=Log_Read(&log_Handle);
 	RTC_TimeMark_Log_Struct(&log_Handle, TimeMark);

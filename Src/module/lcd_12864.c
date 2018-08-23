@@ -7,9 +7,9 @@
 
 // tenhle file bude obsahovat zakladni nastaveni displeje 12864
 
-#include <module/pinmap.h>
-#include <module/Small_7.h>
-#include <module/Font5x.h>
+#include <pinmap.h>
+#include <Small_7.h>
+#include "Font5x.h"
 #include "spi_com.h"
 #include "lcd_12864.h"
 #include "stdio.h"
