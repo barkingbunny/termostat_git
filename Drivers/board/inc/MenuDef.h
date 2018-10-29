@@ -19,11 +19,15 @@
 const menu_item_t MainMenu;
 const menu_item_t setTime;
 const menu_item_t setTemp;
-const menu_item_t extUSB;
 const menu_item_t put_menuReset;
+const menu_item_t extLOG;
 //TIME submenus
 const menu_item_t setDate;
 const menu_item_t setClock;
+// LOG submenus
+const menu_item_t i_printLogLCD;
+const menu_item_t i_printLogUSB;
+
 
 /*
  * uint8_t *menuHeader;
@@ -38,7 +42,7 @@ const menu_item_t setClock;
 const menu_item_t MainMenu = {
 		"MENU",
 		4,
-		{&setTemp,&setTime,&extUSB,&put_menuReset},
+		{&setTemp,&setTime,&extLOG,&put_menuReset},
 		NULL,
 		next
 };
@@ -58,13 +62,6 @@ const menu_item_t setTemp = {
 		&MainMenu,
 		setTemperature
 };
-const menu_item_t extUSB = {
-		"USB PRINT",
-		0,
-		{NULL},
-		&MainMenu,
-		usbPrint
-};
 
 const menu_item_t put_menuReset = {
 		"RESET",
@@ -73,6 +70,15 @@ const menu_item_t put_menuReset = {
 		&MainMenu,
 		menuReset
 };
+
+const menu_item_t extLOG = {
+		"LOGs",
+		2,
+		{&i_printLogLCD,&i_printLogUSB},
+		&MainMenu,
+		next
+};
+
 
 /* submenu for TIME */
 
@@ -91,5 +97,26 @@ const menu_item_t setDate = {
 		&setTime,
 		date
 };
+/* submenu for LOG */
+const menu_item_t i_printLogLCD = {
+		"Print data to LCD",
+		0,
+		{NULL},
+		&extLOG,
+		printLogLCD
+};
+
+const menu_item_t i_printLogUSB = {
+		"Print data to USB",
+		0,
+		{NULL},
+		&extLOG,
+		printLogUSB
+};
+
+
+
+
+
 
 #endif /* MODULE_MENUDEF_H_ */

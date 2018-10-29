@@ -168,7 +168,7 @@ uint8_t menu_action(){
 				en_count=0;
 				break;
 						}
-			case (usbPrint):
+			case (printLogUSB):
 						{
 				char buffer_menu [32];
 				lcd_clear();
@@ -239,25 +239,34 @@ uint8_t menu_action(){
 				}
 				HAL_Delay(3000);
 
-//				for (uint16_t index=0; index<LOG_ARRAY; index++) {
-//					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));
-//					CDC_Transmit_FS(buffer_menu,25);
-//				}
+				//				for (uint16_t index=0; index<LOG_ARRAY; index++) {
+				//					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));
+				//					CDC_Transmit_FS(buffer_menu,25);
+				//				}
 				flags.menu_running=0;
 				lcd_clear();
 				return 0; //exit menu
 
 				break;
 						}
+
+			case (printLogLCD):  // toto zaruci, ze se po dobu vypisu bude stale provadet normalni rutina, ale zaroven se neukonci vypisovani
+						{
+				if (pushed_button == BUT_ENC){
+					return 0; //exit menu
+				}
+				break;
+						}
+
 			case (menuReset):
-			{
+				{
 				NVIC_SystemReset();
-			}
+				}
 
 			}
 
 
-return 1; // correct function.
+			return 1; // correct function.
 }
 
 Bool menu_timout(void){
@@ -287,7 +296,7 @@ void display_menu(menu_item_t* display_menu) {
 			lcd_printString(buffer_menu);
 #ifdef DEBUG
 		lcd_setCharPos(7,8);
-		snprintf(buffer_menu, 12, "pozice %d", position_x);
+		snprintf(buffer_menu, 19, "pozice %d", position_x);
 		lcd_printString(buffer_menu);
 #endif
 
@@ -352,7 +361,21 @@ void display_menu(menu_item_t* display_menu) {
 				lcd_clear();
 			} // end of BUTTONE PUSHED
 			break;
-				}
+		}
+
+		case (printLogLCD):  // Zde se bude vypisovat zalogovane hodnoty
+		{
+
+/*
+ * Sem chci narvat vypisovani logu po radku na displej. Cas mezi vypisovanim byl mel byt definovan nekde dale.
+ * Po vypsani posledniho radku se bude cekat, nez obsluha zmackne encoder, nebo na vyprseni casove konstanty
+ *
+ * zde se bude pravdepodobne nachazet jen jedna funkce, ktera da vedet vypisovaci funkci, ze je cas na dalsi promneou.
+ *
+ */
+
+			break;
+		}
 		default:
 		{
 

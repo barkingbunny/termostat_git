@@ -8,9 +8,6 @@
 #ifndef MODULE_GLOBAL_H_
 #define MODULE_GLOBAL_H_
 
-// tato promena urcuje, ze kod se bude prekladat se vsim co je v DEBUG modu
-#define DEBUG
-
 #include "stm32l0xx_hal.h"
 
 typedef enum {FALSE = 0u, TRUE = 1u} Bool;
@@ -54,11 +51,10 @@ typedef struct {
 	uint8_t log_enabled:1;
 	uint8_t log_requsition:1;
 
-
 }Flags_main;
 
 #define DEBUG 		// debug of the code is turned ON!
-#define SW_VERSION 232 //verze softwaru
+#define SW_VERSION 234 //verze softwaru
 
 #define BUT_DELAY 1		// in milisecond - I want to read it quckly
 #define MAIN_LOOP 25		// in milisecond
@@ -78,8 +74,6 @@ typedef struct {
 
 #define TEMPERATURE_MAX 3000 // 30.00C maximum temperature, when this limit is reached, the radiator will stop.
 #define TEMPERATURE_MIN -1000 //-10.00C maximum temperature, when this limit is reached, the radiator will stop.
-
-#define LOG_DATA_LENGTH 7 // number of logged samples
 
 
 extern Flags_main flags;

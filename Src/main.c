@@ -70,11 +70,11 @@
  * USB*
  * nastveni - 115200-8-N-1, /dev/ttyACM0
  */
+#include "global.h"
 #include "pinmap.h"
 #include "peripherals.h"
-#include "global.h"
-#include "lcd_12864.h"
 #include "BME280.h"
+#include "lcd_12864.h"
 #include "ds18b20.h"
 #include <stdio.h>
 #include "usbd_cdc_if.h"
@@ -83,6 +83,7 @@
 #include "menu.h"
 #include "log.h"
 #include "sleep.h"
+#include "waiter.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -172,6 +173,9 @@ int main(void)
 	MX_ADC_Init();
 
 	/* USER CODE BEGIN 2 */
+	backliteOn();
+	backlite_compare = fill_comparer(BACKLITE_TIMEOUT);
+
 	lcd12864_init(&hspi1);
 	line(0,60,110,60,1);
 	lcd_setCharPos(0,0);
@@ -187,6 +191,7 @@ int main(void)
 	htim22.Instance->CR1 = 1;           // Enable the counter
 
 	BME280_init(&hi2c1,DEFAULT_SLAVE_ADDRESS); // initialization of temp/humid sensor BOSH
+	Log_Init(LOG_PERIODE); // initialization of the logging, each 7 second would be logged the data
 
 	sprintf(buffer_usb, "Hello World, ahha123456");
 	CDC_Transmit_FS(buffer_usb,25);
@@ -206,12 +211,11 @@ int main(void)
 	time_compare = fill_comparer(TIME_PERIODE);
 	button_compare = fill_comparer(BUT_DELAY);
 	heating_compare = fill_comparer(10); // check it immediately
-	logging_compare = fill_comparer_seconds(LOG_PERIODE);
+	logging_compare = fill_comparer_seconds(log_periode_var);
 	show_timeout = 0xfffffffe;
 	heating_instant_timeout = 0;
 
-	backliteOn();
-	backlite_compare = fill_comparer(BACKLITE_TIMEOUT);
+
 	// NEW ADDED
 	/*##- 4- Start the conversion process #######################################*/
 	if (HAL_ADC_Start(&hadc) != HAL_OK)
@@ -323,7 +327,7 @@ int main(void)
 			if (flags.log_enabled)
 			{
 				Log_Temperature(&hrtc, temperature, humid);
-				logging_compare = fill_comparer_seconds(LOG_PERIODE);
+				logging_compare = fill_comparer_seconds(log_periode_var);
 
 			}
 			current_state = IDLE;
@@ -334,7 +338,7 @@ int main(void)
 			break;
 		}
 
-		}// switch CURRENT STATE
+		}// end of switch CURRENT STATE
 
 
 		/* **** SCREEN **** */

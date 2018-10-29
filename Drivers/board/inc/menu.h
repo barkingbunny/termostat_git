@@ -19,16 +19,17 @@
 
 
 #define MAX_MENU_ITEM 5
-#define MAX_CHAR_LENGHT 12
+#define MAX_CHAR_LENGHT 18
 #define MENU_TIMOUT 10000 // x second
 
 typedef enum EnSetMenu_t{
 	clock,
 	date,
 	setTemperature,
-	usbPrint,
+	printLogUSB,
 	next,
-	menuReset
+	menuReset,
+	printLogLCD
 } EnSetMenu;
 
 typedef struct menu_item_s{
