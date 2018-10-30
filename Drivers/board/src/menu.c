@@ -253,20 +253,21 @@ uint8_t menu_action(){
 			case (printLogLCD):  // toto zaruci, ze se po dobu vypisu bude stale provadet normalni rutina, ale zaroven se neukonci vypisovani
 						{
 
-									char buffer_menu5[33];
-								uint8_t	log_readings = Log_To_String(&buffer_menu5, 32);
+									char buffer_menu5[19];
+								uint8_t	log_readings = Log_To_String(&buffer_menu5, 18);
 									lcd_setCharPos(3,0);
 									lcd_printString(buffer_menu5);
+
+
 									HAL_Delay(3000);
 
 				if (pushed_button == BUT_ENC){
 					return 0; //exit menu
 				}
-				if (2 == log_readings) return 0;
+				if (1 == log_readings) return 0;
 
 				break;
 						}
-
 			case (menuReset):
 				{
 				NVIC_SystemReset();

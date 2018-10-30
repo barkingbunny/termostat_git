@@ -191,7 +191,7 @@ int main(void)
 	htim22.Instance->CR1 = 1;           // Enable the counter
 
 	BME280_init(&hi2c1,DEFAULT_SLAVE_ADDRESS); // initialization of temp/humid sensor BOSH
-	Log_Init(LOG_PERIODE); // initialization of the logging, each 7 second would be logged the data
+	Log_Init(LOG_PERIODE); // initialization of the logging, each LOG_PERIODE second would be logged the data
 
 	sprintf(buffer_usb, "Hello World, ahha123456");
 	CDC_Transmit_FS(buffer_usb,25);
@@ -204,7 +204,9 @@ int main(void)
 
 	current_state = MEASURING;
 	show=desktop;
-	flags.log_enabled = TRUE; // logging of the actions
+	flags.log_enable = TRUE; // logging of the actions
+
+
 	//init timers
 	led_compare = fill_comparer(LED_PERIODE);
 	measure_compare = fill_comparer(MEASURE_PERIODE);
@@ -324,12 +326,12 @@ int main(void)
 
 		case LOG:
 		{
-			if (flags.log_enabled)
+			if (flags.log_enable)
 			{
 				Log_Temperature(&hrtc, temperature, humid);
-				logging_compare = fill_comparer_seconds(log_periode_var);
 
 			}
+			logging_compare = fill_comparer_seconds(log_periode_var);
 			current_state = IDLE;
 			break;
 		}
