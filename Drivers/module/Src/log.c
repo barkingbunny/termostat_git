@@ -63,15 +63,6 @@ void RTC_TimeMark_Log_Struct_Short(log_item_t* log_handle, char* showtime)
 
   /* Display time Format : yy:mm:dd:hh:mm */
   sprintf((char*)showtime,"%02d:%02d", log_handle->hour , log_handle->minute);
-
-//debug
-
-    lcd_setCharPos(5,0);
-  lcd_printString(showtime);
-
-
-  //debug
-
 }
 
 
@@ -102,7 +93,7 @@ uint8_t Log_Temperature(RTC_HandleTypeDef* RtcHandle, int32_t temperature, int32
 	if (index_log_wr >= LOG_DATA_LENGTH)
 		index_log_wr = 0;
 
-return index_log_wr;
+return 1;
 }
 
 /*This function is for reading the logged data from memory. Separately - each call is one record
@@ -112,34 +103,46 @@ return index_log_wr;
  *
  */
 uint8_t Log_Read(log_item_t* log_Handle){
-	if (0xfffe == index_log_read) index_log_read=index_log_wr;  // first time, when this function is used.
+	if (!flags_log.read_request){
+		index_log_read=index_log_wr-1;  // first time, when this function is used.
+		flags_log.read_request = TRUE;
+	}
 
+#ifdef DEBUG_TERMOSTAT
 char buffer_s [32];
-lcd_setCharPos(0,0);
+lcd_setCharPos(1,0);
 snprintf(buffer_s, 12, "rd=%i;wr%i  ", index_log_read, index_log_wr);
 lcd_printString(buffer_s);
+#endif
 
-	do {	// this while cile would be done at least once!
-lcd_printString("R");
+	do {	// Write je uz o jedno vetsi, tak neni treba ho navysovat...
+		lcd_printString("R");
 		index_log_read++;
 		if (index_log_read >= LOG_DATA_LENGTH)
 			index_log_read = 0;
-	// NEBEZPECI pri prazdnem bufferu se to zde zacykli a kousne se cely procesor
+		// NEBEZPECI pri prazdnem bufferu se to zde zacykli a kousne se cely procesor
 	} while (0 == log_data[index_log_read].day);
 
+#ifdef DEBUG_TERMOSTAT
+lcd_setCharPos(2,0);
+snprintf(buffer_s, 7, "rd=%i", index_log_read);
+lcd_printString(buffer_s);
+#endif
+
 	//memcpy(log_Handle, log_data[index_log_read], arraysize * sizeof (struct log_item_t));
-	log_Handle->temp_1 = log_data[index_log_read-1].temp_1;
-	log_Handle->hum_1 = log_data[index_log_read-1].hum_1;
-	log_Handle->year = log_data[index_log_read-1].year;
-	log_Handle->month = log_data[index_log_read-1].month;
-	log_Handle->day = log_data[index_log_read-1].day;
-	log_Handle->hour = log_data[index_log_read-1].hour;
-	log_Handle->minute = log_data[index_log_read-1].minute;
+	log_Handle->temp_1 = log_data[index_log_read].temp_1;
+	log_Handle->hum_1 = log_data[index_log_read].hum_1;
+	log_Handle->year = log_data[index_log_read].year;
+	log_Handle->month = log_data[index_log_read].month;
+	log_Handle->day = log_data[index_log_read].day;
+	log_Handle->hour = log_data[index_log_read].hour;
+	log_Handle->minute = log_data[index_log_read].minute;
 
-	if (index_log_read != index_log_wr)
+	if (index_log_read != index_log_wr-1){
 		return 2;
+	}
 
-	index_log_read = 0xfffe;
+	flags_log.read_request= FALSE;
 	return 1;
 }
 
@@ -149,7 +152,6 @@ uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght){
 	char* TimeMark[25];
 
 	log_read_stat=Log_Read(&log_Handle);
-
 	if (field_lenght<19){
 		RTC_TimeMark_Log_Struct_Short(&log_Handle, TimeMark);
 		snprintf((char*)field_of_char, 18, "%s;%d;%d;",TimeMark,log_Handle.temp_1, log_Handle.hum_1);
@@ -160,14 +162,15 @@ uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght){
 		snprintf((char*)field_of_char, 32, "%s;%d;%d;",TimeMark,log_Handle.temp_1, log_Handle.hum_1);
 	}
 
-	if (2 == log_read_stat) // if there are more data to read, return 2;
+	if (2 == log_read_stat){ // if there are more data to read, return 2;
 		return 2;
+	}
 	// if all memory was read, return 1;
 	return 1;
 }
 
-void Log_Init(uint16_t time_log_periode){
-	log_periode_var = time_log_periode;
+void Log_Init(){
+	flags_log.read_request = FALSE;
 // delete complete variable log_data
 	for (uint16_t index=0; index<LOG_DATA_LENGTH; index++){
 		log_data[index_log_wr].temp_1= 0;

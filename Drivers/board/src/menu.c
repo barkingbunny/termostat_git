@@ -36,8 +36,8 @@ uint8_t activation_memu(){
 uint8_t menu_action(){
 	lcd_setCharPos(7,0);
 	char buffer_s [32];
-		snprintf(buffer_s, 12, "enc%03i", (en_count));
-		lcd_printString(buffer_s);
+	snprintf(buffer_s, 12, "enc%03i", (en_count));
+	lcd_printString(buffer_s);
 
 	if (flags.enc_changed) // move by encoder was detected - action on displai
 				menu_compare = HAL_GetTick()+MENU_TIMOUT;	//enlarge time in menu
@@ -177,8 +177,6 @@ uint8_t menu_action(){
 				lcd_printString(buffer_menu);
 		//debug
 
-				uint8_t post=11;
-
 				uint8_t buffer_menu2 [16] = "Vypisuji na USB";
 				char buffer_menu3 [32];
 				//snprintf(buffer_menu, 16, "Vypisuji na USB");
@@ -211,40 +209,14 @@ uint8_t menu_action(){
 				 snprintf(buffer_menu, 9, "return %d", post);
 				 lcd_printString(buffer_menu);
 
-
-				 lcd_setCharPos(6,1);
-				snprintf(buffer_menu, 9, "return %d", post);
-				lcd_printString(buffer_menu);
 */
 
-				uint8_t index_l = 2;
-				post = 2;
-				char buffer_menu4[33];
-				while(2 == post){
-					post=Log_To_String(&buffer_menu4, 32);
-					lcd_setCharPos(index_l,0);
-					snprintf(buffer_menu3, 8, "P=%d;", post);
-					lcd_printString(buffer_menu3);
-					//post = CDC_Transmit_FS(buffer_menu,32);
-
-					lcd_printString(buffer_menu4);
-					index_l++;
-					HAL_Delay(5000);
-					if (7<index_l){
-						index_l=1;
-						HAL_Delay(2000);
-						lcd_clear();
-					}
-
-				}
-				HAL_Delay(3000);
 
 				//				for (uint16_t index=0; index<LOG_ARRAY; index++) {
 				//					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));
 				//					CDC_Transmit_FS(buffer_menu,25);
 				//				}
-				flags.menu_running=0;
-				lcd_clear();
+
 				return 0; //exit menu
 
 				break;
@@ -253,38 +225,43 @@ uint8_t menu_action(){
 			case (printLogLCD):  // toto zaruci, ze se po dobu vypisu bude stale provadet normalni rutina, ale zaroven se neukonci vypisovani
 						{
 
-									char buffer_menu5[19];
-								uint8_t	log_readings = Log_To_String(&buffer_menu5, 18);
-									lcd_setCharPos(3,0);
-									lcd_printString(buffer_menu5);
-
-
-									HAL_Delay(3000);
+				char buffer_menu5[19];
+				uint8_t	log_readings = Log_To_String(&buffer_menu5, 18);
+				lcd_setCharPos(3,0);
+				lcd_printString(buffer_menu5);
+				HAL_Delay(1000);
+				menu_compare = HAL_GetTick()+1500; // Pri cteni mi vyprsel cas pro menu. tak ho zvetsuji.
 
 				if (pushed_button == BUT_ENC){
 					return 0; //exit menu
 				}
-				if (1 == log_readings) return 0;
+				if (1 == log_readings) // all data read
+					return 0;//exit menu
 
 				break;
 						}
+
 			case (menuReset):
 				{
 				NVIC_SystemReset();
+				break;
 				}
 
+			default:
+			{
+				lcd_setCharPos(3,5);
+				lcd_printString("ERROR 0100");
+
+				break;
 			}
-
-
-			return 1; // correct function.
+		} // end of switch
+		return 1; // correct function.
 }
 
 Bool menu_timout(void){
 	if(HAL_GetTick() < menu_compare){
 		return TRUE;
 	}
-	flags.menu_running=0;
-	lcd_clear();
 	return FALSE;
 }
 
@@ -304,7 +281,7 @@ void display_menu(menu_item_t* display_menu) {
 			RTC_TimeShow_time(&set_stimestructureget,buffer_menu);
 			lcd_setCharPos(1,10);
 			lcd_printString(buffer_menu);
-#ifdef DEBUG
+#ifdef DEBUG_TERMOSTAT
 		lcd_setCharPos(7,8);
 		snprintf(buffer_menu, 19, "pozice %d", position_x);
 		lcd_printString(buffer_menu);
@@ -352,7 +329,7 @@ void display_menu(menu_item_t* display_menu) {
 					snprintf(buffer_menu, 12, "%3ld.%02d C ",set_temperature/100,abs(set_temperature%100));
 					lcd_printString(buffer_menu);
 					char_magnitude(1);
-#ifdef DEBUG
+#ifdef DEBUG_TERMOSTAT
 	// for debuf purpouses, delete after debuging ended
 
 
@@ -383,7 +360,6 @@ void display_menu(menu_item_t* display_menu) {
  * zde se bude pravdepodobne nachazet jen jedna funkce, ktera da vedet vypisovaci funkci, ze je cas na dalsi promneou.
  *
  */
-
 			break;
 		}
 		default:
@@ -391,7 +367,7 @@ void display_menu(menu_item_t* display_menu) {
 
 			break;
 		}
-		}
+		}// end switch
 
 	}
 	else{ // write a list of menu choices
@@ -407,4 +383,4 @@ void display_menu(menu_item_t* display_menu) {
 		else
 			lcd_printString("Back");
 	}
-}
+}// end function

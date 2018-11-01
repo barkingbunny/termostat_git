@@ -191,7 +191,7 @@ int main(void)
 	htim22.Instance->CR1 = 1;           // Enable the counter
 
 	BME280_init(&hi2c1,DEFAULT_SLAVE_ADDRESS); // initialization of temp/humid sensor BOSH
-	Log_Init(LOG_PERIODE); // initialization of the logging, each LOG_PERIODE second would be logged the data
+	Log_Init(); // initialization of the logging, each LOG_PERIODE second would be logged the data
 
 	sprintf(buffer_usb, "Hello World, ahha123456");
 	CDC_Transmit_FS(buffer_usb,25);
@@ -213,7 +213,10 @@ int main(void)
 	time_compare = fill_comparer(TIME_PERIODE);
 	button_compare = fill_comparer(BUT_DELAY);
 	heating_compare = fill_comparer(10); // check it immediately
-	logging_compare = fill_comparer_seconds(log_periode_var);
+	logging_compare = fill_comparer_seconds(LOG_PERIODE);
+#ifdef DEBUG_TERMOSTAT
+logging_compare = fill_comparer_seconds(2);
+#endif
 	show_timeout = 0xfffffffe;
 	heating_instant_timeout = 0;
 
@@ -331,7 +334,7 @@ int main(void)
 				Log_Temperature(&hrtc, temperature, humid);
 
 			}
-			logging_compare = fill_comparer_seconds(log_periode_var);
+			logging_compare = fill_comparer_seconds(LOG_PERIODE);
 			current_state = IDLE;
 			break;
 		}
@@ -406,7 +409,7 @@ int main(void)
 				lcd_setCharPos(0,1);
 				lcd_printString(aShowTime);
 
-#ifdef DEBUG	//debug
+#ifdef DEBUG_TERMOSTAT	//debug
 				lcd_setCharPos(3,20);
 				if (beta_part){
 					lcd_printString("T");
@@ -521,7 +524,7 @@ int main(void)
 			show = desktop;
 		}
 // MENU TIMEOUT
-		if ((flags.menu_running==1)) // je to takhle slozite , protoze jsem neprisel na jiny efektivni zpusob, jak smazat displej, po zkonceni menu
+		if ((TRUE==flags.menu_running)) // je to takhle slozite , protoze jsem neprisel na jiny efektivni zpusob, jak smazat displej, po zkonceni menu
 			if(menu_timout()) {
 				if (!menu_action()){ // exit from menu condition
 					flags.menu_running=0;
@@ -530,8 +533,12 @@ int main(void)
 				}
 				else
 					show = menu;
-
 			} // if menu - TIMEOUT
+			else {
+				flags.menu_running=0;
+				lcd_clear();
+				show = desktop;
+			}
 
 		if (flags.temp_new_set){
 			flags.temp_new_set = FALSE;

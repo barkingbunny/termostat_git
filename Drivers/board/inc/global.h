@@ -10,8 +10,8 @@
 
 #include "stm32l0xx_hal.h"
 
-#define DEBUG 		// debug of the code is turned ON!
-#define SW_VERSION 238 //verze softwaru
+#define DEBUG_TERMOSTAT 		// debug of the code is turned ON!
+#define SW_VERSION 239 //verze softwaru
 
 #define BUT_DELAY 1		// in milisecond - I want to read it quckly
 #define MAIN_LOOP 25		// in milisecond
@@ -21,7 +21,7 @@
 #define HEATING_PERIODE 1000 // every 5 minute check for change - turn on / off heater
 #define LOG_PERIODE 300 // in seconds - every 5 minute check for change - turn on / off heater
 
-#ifdef DEBUG
+#ifdef DEBUG_TERMOSTAT
 	#define LOG_PERIODE 10
 #endif
 

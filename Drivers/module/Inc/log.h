@@ -11,7 +11,7 @@
 #include "pinmap.h"
 #include "global.h"
 
-#define LOG_DATA_LENGTH 10 // number of logged samples
+#define LOG_DATA_LENGTH 50 // number of logged samples
 
 typedef struct {
 	uint8_t minute;
@@ -22,6 +22,13 @@ typedef struct {
 	int16_t temp_1;
 	int16_t hum_1;
 }log_item_t;
+
+typedef struct {
+	uint8_t new_data:1;
+	uint8_t read_request:1;
+}Flags_logs;
+
+Flags_logs flags_log;
 
 uint8_t Log_Data(RTC_HandleTypeDef* RtcHandle, int16_t temperature, int16_t humidity, int16_t pressure, uint16_t diagnostics);
 void RTC_TimeMark(RTC_HandleTypeDef* RtcHandle, char* showtime);
@@ -37,9 +44,7 @@ uint8_t Log_Temperature(RTC_HandleTypeDef* RtcHandle, int32_t temperature, int32
 uint8_t Log_Read(log_item_t* log_Handle);
 
 uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght);
-void Log_Init(uint16_t time_log_periode);
-
-uint16_t log_periode_var; // in seconds - every x second are logged the data
+void Log_Init();
 
 log_item_t log_data[LOG_DATA_LENGTH];
 
