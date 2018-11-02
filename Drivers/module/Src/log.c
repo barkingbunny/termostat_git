@@ -171,6 +171,10 @@ uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght){
 void Log_Init(){
 	flags_log.read_request = FALSE;
 // delete complete variable log_data
+	Log_errase_database();
+} // end Log_Init
+
+void Log_errase_database(void){
 	for (uint16_t index=0; index<LOG_DATA_LENGTH; index++){
 		log_data[index_log_wr].temp_1= 0;
 		log_data[index_log_wr].hum_1 = 0;
@@ -179,6 +183,6 @@ void Log_Init(){
 		log_data[index_log_wr].day = 0;
 		log_data[index_log_wr].hour = 0;
 		log_data[index_log_wr].minute = 0;
-
 	} // end FOR
-} // end Log_Init
+
+}
