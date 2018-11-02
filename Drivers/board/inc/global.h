@@ -11,7 +11,7 @@
 #include "stm32l0xx_hal.h"
 
 #define DEBUG_TERMOSTAT 		// debug of the code is turned ON!
-#define SW_VERSION 240 //verze softwaru
+#define SW_VERSION 241 //verze softwaru
 
 #define BUT_DELAY 1		// in milisecond - I want to read it quckly
 #define MAIN_LOOP 25		// in milisecond

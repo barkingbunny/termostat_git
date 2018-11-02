@@ -388,7 +388,7 @@ void display_menu(menu_item_t* display_menu) {
 			lcd_printString("\r");
 			snprintf(buffer_menu, 20, "Verze:  0.%d \r", SW_VERSION);
 			lcd_printString(buffer_menu);
-			snprintf(buffer_menu, 20, "Pocet logu %i", LOG_DATA_LENGTH);
+			snprintf(buffer_menu, 20, "Pocet logu %3u/%u", Log_memory_fullness(), LOG_DATA_LENGTH);
 			lcd_printString(buffer_menu);
 
 			break;

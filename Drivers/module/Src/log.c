@@ -186,3 +186,39 @@ void Log_errase_database(void){
 	} // end FOR
 
 }
+/**this function return number of data in the database
+ *
+ */
+uint16_t Log_memory_fullness(void){
+	uint16_t log_occupate =0;
+	for (uint16_t index=0; index<LOG_DATA_LENGTH; index++){
+		if(0 != log_data[index].day)
+			log_occupate++;
+	}
+	return log_occupate;
+}
+
+/** Vymaze poslednich "delete_last" zaznamu z databaze
+ *
+ */
+uint8_t Log_delete_last(uint16_t delete_last){
+	uint16_t index_log_delete = index_log_wr-1;  // set the reading data to the latest log
+	do {	// Write je uz o jedno vetsi, tak neni treba ho navysovat...
+		index_log_delete++;
+		if (index_log_delete >= LOG_DATA_LENGTH)
+			index_log_delete = 0;
+		// NEBEZPECI pri prazdnem bufferu se to zde zacykli a kousne se cely procesor
+	} while (0 == log_data[index_log_delete].day);
+	for (uint16_t index=0; index<delete_last; index++){
+		log_data[index_log_delete].temp_1=0;
+		log_data[index_log_delete].hum_1=0;
+		log_data[index_log_delete].year=0;
+		log_data[index_log_delete].month=0;
+		log_data[index_log_delete].day=0;
+		log_data[index_log_delete].hour=0;
+		log_data[index_log_delete].minute=0;
+		index_log_delete++;
+
+	}
+	return 1;
+}
