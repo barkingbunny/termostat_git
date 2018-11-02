@@ -33,8 +33,15 @@ uint8_t activation_memu(){
 	return 0;
 }
 
+/** MENU action - function that cure all function in the MENU
+ *
+ * return values:
+ * 0 - success finished menu, exit
+ * 1 - success, continue in the MENU
+ *
+ */
 uint8_t menu_action(){
-	lcd_setCharPos(7,0);
+	lcd_setCharPos(7,14);
 	char buffer_s [32];
 	snprintf(buffer_s, 12, "enc%03i", (en_count));
 	lcd_printString(buffer_s);
@@ -168,6 +175,11 @@ uint8_t menu_action(){
 				en_count=0;
 				break;
 						}
+
+			case (setTemperature):{
+
+				break;
+			}
 			case (printLogUSB):
 						{
 				char buffer_menu [32];
@@ -233,10 +245,11 @@ uint8_t menu_action(){
 				menu_compare = HAL_GetTick()+1500; // Pri cteni mi vyprsel cas pro menu. tak ho zvetsuji.
 
 				if (pushed_button == BUT_ENC){
+					flags_log.read_request=FALSE;
 					return 0; //exit menu
 				}
 				if (1 == log_readings) // all data read
-					return 0;//exit menu
+					return 0;//exit menu, finished
 
 				break;
 						}
@@ -244,6 +257,16 @@ uint8_t menu_action(){
 			case (menuReset):
 				{
 				NVIC_SystemReset();
+				break;
+				}
+			case (information):
+				{
+
+
+				if (pushed_button == BUT_ENC){
+					flags_log.read_request=FALSE;
+					return 0; //exit menu
+				}
 				break;
 				}
 
@@ -255,7 +278,7 @@ uint8_t menu_action(){
 				break;
 			}
 		} // end of switch
-		return 1; // correct function.
+		return 1; // correct end of function- continue.
 }
 
 Bool menu_timout(void){
@@ -264,6 +287,7 @@ Bool menu_timout(void){
 	}
 	return FALSE;
 }
+
 
 void display_menu(menu_item_t* display_menu) {
 	char buffer_menu [32];
@@ -329,11 +353,6 @@ void display_menu(menu_item_t* display_menu) {
 					snprintf(buffer_menu, 12, "%3ld.%02d C ",set_temperature/100,abs(set_temperature%100));
 					lcd_printString(buffer_menu);
 					char_magnitude(1);
-#ifdef DEBUG_TERMOSTAT
-	// for debuf purpouses, delete after debuging ended
-
-
-#endif
 				}
 			}
 			if (pushed_button == BUT_ENC)
@@ -341,7 +360,7 @@ void display_menu(menu_item_t* display_menu) {
 				temperature_set = set_temperature;
 				//			show = desktop;
 				flags.temp_new_set = TRUE;
-				flags.heating_up = TRUE; // if the buttone was pushed, turn-on the heater, even if the temperature is reached.
+				flags.heating_up = TRUE; // if the button was pushed, turn-on the heater, even if the temperature is reached.
 
 				// end of the Menu
 				flags.menu_running=0;
@@ -354,7 +373,7 @@ void display_menu(menu_item_t* display_menu) {
 		{
 
 /*
- * Sem chci narvat vypisovani logu po radku na displej. Cas mezi vypisovanim byl mel byt definovan nekde dale.
+ * Sem chci narvat vypisovani logu po radku na displej. Cas mezi vypisovanim by mel byt definovan nekde dale.
  * Po vypsani posledniho radku se bude cekat, nez obsluha zmackne encoder, nebo na vyprseni casove konstanty
  *
  * zde se bude pravdepodobne nachazet jen jedna funkce, ktera da vedet vypisovaci funkci, ze je cas na dalsi promneou.
@@ -362,6 +381,19 @@ void display_menu(menu_item_t* display_menu) {
  */
 			break;
 		}
+		case (information):  // Zde se budou vypisovat informace ohledne FW/HW
+			{
+			lcd_setCharPos(1,0);
+			lcd_printString("Termostat_git\r");
+			lcd_printString("\r");
+			snprintf(buffer_menu, 20, "Verze:  0.%d \r", SW_VERSION);
+			lcd_printString(buffer_menu);
+			snprintf(buffer_menu, 20, "Pocet logu %i", LOG_DATA_LENGTH);
+			lcd_printString(buffer_menu);
+
+			break;
+			}
+
 		default:
 		{
 

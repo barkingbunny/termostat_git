@@ -488,7 +488,7 @@ logging_compare = fill_comparer_seconds(2);
 		}
 		default:{
 			lcd_setCharPos(1,1);
-			lcd_printString("DEFAULT   DEFFFF" );
+			lcd_printString("ERROR display -default" );
 		}
 		}// switch show
 		/**

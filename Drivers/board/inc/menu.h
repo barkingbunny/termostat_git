@@ -29,7 +29,8 @@ typedef enum EnSetMenu_t{
 	printLogUSB,
 	next,
 	menuReset,
-	printLogLCD
+	printLogLCD,
+	information
 } EnSetMenu;
 
 typedef struct menu_item_s{

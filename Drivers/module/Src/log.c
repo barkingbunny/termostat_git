@@ -16,7 +16,6 @@
 
 uint16_t index_log_wr = 0;
 uint16_t index_log_read = 0xfffe;
-RTC_HandleTypeDef received_time;
 
 uint8_t Log_Data(RTC_HandleTypeDef* RtcHandle, int16_t temperature, int16_t humidity, int16_t pressure, uint16_t diagnostics)
 {
@@ -103,20 +102,20 @@ return 1;
  *
  */
 uint8_t Log_Read(log_item_t* log_Handle){
-	if (!flags_log.read_request){
-		index_log_read=index_log_wr-1;  // first time, when this function is used.
+	if (!flags_log.read_request){		// first time, when this function is used.
+		index_log_read=index_log_wr-1;  // set the reading data to the latest log
 		flags_log.read_request = TRUE;
 	}
 
 #ifdef DEBUG_TERMOSTAT
 char buffer_s [32];
 lcd_setCharPos(1,0);
-snprintf(buffer_s, 12, "rd=%i;wr%i  ", index_log_read, index_log_wr);
+snprintf(buffer_s, 19, "rd=%3i;wr%3i  ", index_log_read, index_log_wr-1);
 lcd_printString(buffer_s);
 #endif
 
 	do {	// Write je uz o jedno vetsi, tak neni treba ho navysovat...
-		lcd_printString("R");
+lcd_printString("R");
 		index_log_read++;
 		if (index_log_read >= LOG_DATA_LENGTH)
 			index_log_read = 0;
@@ -125,7 +124,7 @@ lcd_printString(buffer_s);
 
 #ifdef DEBUG_TERMOSTAT
 lcd_setCharPos(2,0);
-snprintf(buffer_s, 7, "rd=%i", index_log_read);
+snprintf(buffer_s, 10, "ctu %3i ", index_log_read);
 lcd_printString(buffer_s);
 #endif
 

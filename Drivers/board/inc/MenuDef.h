@@ -21,6 +21,7 @@ const menu_item_t setTime;
 const menu_item_t setTemp;
 const menu_item_t put_menuReset;
 const menu_item_t extLOG;
+const menu_item_t about;
 //TIME submenus
 const menu_item_t setDate;
 const menu_item_t setClock;
@@ -41,8 +42,8 @@ const menu_item_t i_printLogUSB;
 // MAIN MENU - root
 const menu_item_t MainMenu = {
 		"MENU",
-		4,
-		{&setTemp,&setTime,&extLOG,&put_menuReset},
+		5,
+		{&setTemp,&setTime,&extLOG,&put_menuReset,&about},
 		NULL,
 		next
 };
@@ -77,6 +78,13 @@ const menu_item_t extLOG = {
 		{&i_printLogLCD,&i_printLogUSB},
 		&MainMenu,
 		next
+};
+const menu_item_t about = {
+		"ABOUT",
+		0,
+		{NULL},
+		&MainMenu,
+		information
 };
 
 
