@@ -15,18 +15,22 @@
 #include "rtc_api.h"
 #include "rtc.h"
 #include "usb_device.h"
+#include "log.h"
+
 
 #define MAX_MENU_ITEM 5
-#define MAX_CHAR_LENGHT 12
+#define MAX_CHAR_LENGHT 18
 #define MENU_TIMOUT 10000 // x second
 
 typedef enum EnSetMenu_t{
 	clock,
 	date,
 	setTemperature,
-	usbPrint,
+	printLogUSB,
 	next,
-	menuReset
+	menuReset,
+	printLogLCD,
+	information
 } EnSetMenu;
 
 typedef struct menu_item_s{
@@ -42,11 +46,6 @@ extern int32_t temperature_set;
 extern Buttons pushed_button;
 extern int8_t en_count;
 extern int32_t temperature;
-// LOG init start
-extern int32_t log_temperature[LOG_ARRAY];
-extern int32_t log_humid[LOG_ARRAY];
-extern uint8_t log_hour[LOG_ARRAY], log_min[LOG_ARRAY];
-
 
 uint8_t menu_action();
 void display_menu(menu_item_t* display_menu);

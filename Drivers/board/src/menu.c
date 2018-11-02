@@ -33,11 +33,18 @@ uint8_t activation_memu(){
 	return 0;
 }
 
+/** MENU action - function that cure all function in the MENU
+ *
+ * return values:
+ * 0 - success finished menu, exit
+ * 1 - success, continue in the MENU
+ *
+ */
 uint8_t menu_action(){
-	lcd_setCharPos(7,0);
+	lcd_setCharPos(7,14);
 	char buffer_s [32];
-		snprintf(buffer_s, 12, "enc%03i", (en_count));
-		lcd_printString(buffer_s);
+	snprintf(buffer_s, 12, "enc%03i", (en_count));
+	lcd_printString(buffer_s);
 
 	if (flags.enc_changed) // move by encoder was detected - action on displai
 				menu_compare = HAL_GetTick()+MENU_TIMOUT;	//enlarge time in menu
@@ -168,49 +175,119 @@ uint8_t menu_action(){
 				en_count=0;
 				break;
 						}
-			case (usbPrint):
+
+			case (setTemperature):{
+
+				break;
+			}
+			case (printLogUSB):
 						{
 				char buffer_menu [32];
 				lcd_clear();
 				lcd_setCharPos(1,1);
-				snprintf(buffer_menu, 12, "Vypisuji na USB");
+				snprintf(buffer_menu, 16, "Vypisuji na USB");
 				lcd_printString(buffer_menu);
+		//debug
 
-				snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
-				CDC_Transmit_FS(buffer_menu,5);
-				snprintf(buffer_menu, 30, "i; hours; min; temp; humid\r\n");
-				CDC_Transmit_FS(buffer_menu,32);
-				snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
-				CDC_Transmit_FS(buffer_menu,5);
-				for (uint16_t index=0; index<LOG_ARRAY; index++) {
-					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));
-					CDC_Transmit_FS(buffer_menu,25);
-				}
-				flags.menu_running=0;
-				lcd_clear();
+				uint8_t buffer_menu2 [16] = "Vypisuji na USB";
+				char buffer_menu3 [32];
+				//snprintf(buffer_menu, 16, "Vypisuji na USB");
+			/*	post = CDC_Transmit_FS(buffer_menu2,16);
+
+				lcd_setCharPos(0,4);
+				snprintf(buffer_menu, 12, "return %i", post);
+				lcd_printString(buffer_menu);
+*/
+				//buffer_menu2 = "\r\n";
+				//CDC_Transmit_FS(buffer_menu2,5);
+				/*snprintf(buffer_menu, 30, "i; hours; min; temp; humid\r\n");
+				CDC_Transmit_FS(buffer_menu,30);
+				/*buffer_menu2 = "i; hours; min; temp; humid\r\n";
+				CDC_Transmit_FS(buffer_menu2,30);
+				buffer_menu2 = "\r\n";   // pouze odradkovani a zformatovani
+				CDC_Transmit_FS(buffer_menu2,5);
+		//debug
+				 snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
+				 post = CDC_Transmit_FS(buffer_menu,5);
+				 snprintf(buffer_menu, 9, "return %d", post);
+				 lcd_printString(buffer_menu);
+				 snprintf(buffer_menu, 1, " ");
+				 snprintf(buffer_menu, 30, "i; hours; min; temp; humid\r\n");
+				 post = CDC_Transmit_FS(buffer_menu,30);
+				 snprintf(buffer_menu, 9, "return %d", post);
+				 lcd_printString(buffer_menu);
+				 snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
+				 post = CDC_Transmit_FS(buffer_menu,5);
+				 snprintf(buffer_menu, 9, "return %d", post);
+				 lcd_printString(buffer_menu);
+
+*/
+
+
+				//				for (uint16_t index=0; index<LOG_ARRAY; index++) {
+				//					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));
+				//					CDC_Transmit_FS(buffer_menu,25);
+				//				}
+
 				return 0; //exit menu
 
 				break;
 						}
+
+			case (printLogLCD):  // toto zaruci, ze se po dobu vypisu bude stale provadet normalni rutina, ale zaroven se neukonci vypisovani
+						{
+
+				char buffer_menu5[19];
+				uint8_t	log_readings = Log_To_String(&buffer_menu5, 18);
+				lcd_setCharPos(3,0);
+				lcd_printString(buffer_menu5);
+				HAL_Delay(1000);
+				menu_compare = HAL_GetTick()+1500; // Pri cteni mi vyprsel cas pro menu. tak ho zvetsuji.
+
+				if (pushed_button == BUT_ENC){
+					flags_log.read_request=FALSE;
+					return 0; //exit menu
+				}
+				if (1 == log_readings) // all data read
+					return 0;//exit menu, finished
+
+				break;
+						}
+
 			case (menuReset):
-							{
+				{
+				NVIC_SystemReset();
+				break;
+				}
+			case (information):
+				{
 
-							}
 
+				if (pushed_button == BUT_ENC){
+					flags_log.read_request=FALSE;
+					return 0; //exit menu
+				}
+				break;
+				}
+
+			default:
+			{
+				lcd_setCharPos(3,5);
+				lcd_printString("ERROR 0100");
+
+				break;
 			}
-
-
-return 1; // correct function.
+		} // end of switch
+		return 1; // correct end of function- continue.
 }
 
 Bool menu_timout(void){
 	if(HAL_GetTick() < menu_compare){
 		return TRUE;
 	}
-	flags.menu_running=0;
-	lcd_clear();
 	return FALSE;
 }
+
 
 void display_menu(menu_item_t* display_menu) {
 	char buffer_menu [32];
@@ -228,9 +305,9 @@ void display_menu(menu_item_t* display_menu) {
 			RTC_TimeShow_time(&set_stimestructureget,buffer_menu);
 			lcd_setCharPos(1,10);
 			lcd_printString(buffer_menu);
-#ifdef DEBUG
+#ifdef DEBUG_TERMOSTAT
 		lcd_setCharPos(7,8);
-		snprintf(buffer_menu, 12, "pozice %d", position_x);
+		snprintf(buffer_menu, 19, "pozice %d", position_x);
 		lcd_printString(buffer_menu);
 #endif
 
@@ -276,11 +353,6 @@ void display_menu(menu_item_t* display_menu) {
 					snprintf(buffer_menu, 12, "%3ld.%02d C ",set_temperature/100,abs(set_temperature%100));
 					lcd_printString(buffer_menu);
 					char_magnitude(1);
-#ifdef DEBUG
-	// for debuf purpouses, delete after debuging ended
-
-
-#endif
 				}
 			}
 			if (pushed_button == BUT_ENC)
@@ -288,20 +360,46 @@ void display_menu(menu_item_t* display_menu) {
 				temperature_set = set_temperature;
 				//			show = desktop;
 				flags.temp_new_set = TRUE;
-				flags.heating_up = TRUE; // if the buttone was pushed, turn-on the heater, even if the temperature is reached.
+				flags.heating_up = TRUE; // if the button was pushed, turn-on the heater, even if the temperature is reached.
 
 				// end of the Menu
 				flags.menu_running=0;
 				lcd_clear();
 			} // end of BUTTONE PUSHED
 			break;
-				}
+		}
+
+		case (printLogLCD):  // Zde se bude vypisovat zalogovane hodnoty
+		{
+
+/*
+ * Sem chci narvat vypisovani logu po radku na displej. Cas mezi vypisovanim by mel byt definovan nekde dale.
+ * Po vypsani posledniho radku se bude cekat, nez obsluha zmackne encoder, nebo na vyprseni casove konstanty
+ *
+ * zde se bude pravdepodobne nachazet jen jedna funkce, ktera da vedet vypisovaci funkci, ze je cas na dalsi promneou.
+ *
+ */
+			break;
+		}
+		case (information):  // Zde se budou vypisovat informace ohledne FW/HW
+			{
+			lcd_setCharPos(1,0);
+			lcd_printString("Termostat_git\r");
+			lcd_printString("\r");
+			snprintf(buffer_menu, 20, "Verze:  0.%d \r", SW_VERSION);
+			lcd_printString(buffer_menu);
+			snprintf(buffer_menu, 20, "Pocet logu %i", LOG_DATA_LENGTH);
+			lcd_printString(buffer_menu);
+
+			break;
+			}
+
 		default:
 		{
 
 			break;
 		}
-		}
+		}// end switch
 
 	}
 	else{ // write a list of menu choices
@@ -317,4 +415,4 @@ void display_menu(menu_item_t* display_menu) {
 		else
 			lcd_printString("Back");
 	}
-}
+}// end function

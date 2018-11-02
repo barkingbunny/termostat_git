@@ -9,7 +9,7 @@
 #define MODULE_ONE_WIRE_H_
 
 #include "pinmap.h"
-
+#include "stm32l0xx_hal_gpio.h"
 // Timing delay for 1-wire serial standard option
     //enum DELAY { A = 6, B = 64, C = 60, D = 10, E = 9, F = 55, G = 0, H = 480, I = 70, J = 410 };
 	enum DELAY { A = 2, B = 35, C =46, D = 2, E =1, F = 15, G = 0, H = 450, I =42, J = 420 };

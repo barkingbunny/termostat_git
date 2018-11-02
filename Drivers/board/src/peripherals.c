@@ -65,6 +65,16 @@ void turnOffHeater(void){
 	Led1Clear;
 }
 
+void backliteOn(void){
+
+	HAL_GPIO_WritePin(D_LCD_LIGHT_GPIO_Port,D_LCD_LIGHT_Pin,GPIO_PIN_SET);
+}
+
+void backliteOff(void){
+
+	HAL_GPIO_WritePin(D_LCD_LIGHT_GPIO_Port,D_LCD_LIGHT_Pin,GPIO_PIN_RESET);
+}
+
 /*
 void toggleLED(const uint8_t led){
 

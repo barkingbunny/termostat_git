@@ -25,6 +25,9 @@ void togleLED(uint8_t led);
 Buttons checkButtons(void);
 uint8_t turnOnHeater(uint32_t temperature);
 void turnOffHeater(void);
+void backliteOn(void);
+void backliteOff(void);
+
 
 //encoder constant
 //#define ENCODER_HALF 128
