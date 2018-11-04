@@ -106,24 +106,30 @@ uint8_t menu_action(){
 						} // END case (next)
 
 			case (clock):
-					{
+				{
 				if (pushed_button == BUT_ENC){
 					position_x++;
 				}
 				if (position_x==0) {
-					set_stimestructureget.Hours=set_stimestructureget.Hours+en_count;
-					if (set_stimestructureget.Hours < 0) set_stimestructureget.Hours=0;
-					if (set_stimestructureget.Hours > 23) set_stimestructureget.Hours=23;
+					if (set_stimestructureget.Hours+en_count < 0) set_stimestructureget.Hours=set_stimestructureget.Hours+23+en_count;
+					else{
+						set_stimestructureget.Hours=set_stimestructureget.Hours+en_count;
+					}
+					if (set_stimestructureget.Hours > 23) set_stimestructureget.Hours-=23;
 				}
 				if (position_x==1){
-					set_stimestructureget.Minutes=set_stimestructureget.Minutes+en_count;
-					if (set_stimestructureget.Minutes < 0) set_stimestructureget.Minutes=0;
-					if (set_stimestructureget.Minutes > 59) set_stimestructureget.Minutes=59;
+					if (set_stimestructureget.Minutes+en_count < 0) set_stimestructureget.Minutes=set_stimestructureget.Minutes+59+en_count;
+					else{
+						set_stimestructureget.Minutes=set_stimestructureget.Minutes+en_count;
+					}
+					if (set_stimestructureget.Minutes > 59) set_stimestructureget.Minutes-=59;
 				}
 				if (position_x==2){
-					set_stimestructureget.Seconds=set_stimestructureget.Seconds+en_count;
-					if (set_stimestructureget.Seconds < 0) set_stimestructureget.Seconds=0;
-					if (set_stimestructureget.Seconds > 59) set_stimestructureget.Seconds=59;
+					if (set_stimestructureget.Seconds+en_count < 0) set_stimestructureget.Seconds=set_stimestructureget.Seconds+59+en_count;
+					else{
+						set_stimestructureget.Seconds=set_stimestructureget.Seconds+en_count;
+					}
+					if (set_stimestructureget.Seconds > 59) set_stimestructureget.Seconds-=59;
 
 				}
 				if (position_x==3){ // last click with encoder
@@ -147,19 +153,28 @@ uint8_t menu_action(){
 					position_x++;
 				}
 				if (position_x==0) {
-					set_datestruct.Date=set_datestruct.Date+en_count;
-					if (set_datestruct.Date < 1) set_datestruct.Date=1;
-					if (set_datestruct.Date > 31) set_datestruct.Date=31;
+					if (set_datestruct.Year+en_count < 1) set_datestruct.Year=set_datestruct.Year+99+en_count;
+					else{
+						set_datestruct.Year = set_datestruct.Year+en_count;
+					}
+					if (set_datestruct.Year > 99) set_datestruct.Year-=99;
+
 				}
 				if (position_x==1){
-					set_datestruct.Month = set_datestruct.Month+en_count;
-					if (set_datestruct.Month < 1) set_datestruct.Month=1;
-					if (set_datestruct.Month > 12) set_datestruct.Month=12;
+					if (set_datestruct.Month+en_count < 1) set_datestruct.Month= set_datestruct.Month+12+en_count;
+					else{
+						set_datestruct.Month = set_datestruct.Month+en_count;
+					}
+					if (set_datestruct.Month > 12) set_datestruct.Month-=12;
+
 				}
 				if (position_x==2){
-					set_datestruct.Year = set_datestruct.Year+en_count;
-					if (set_datestruct.Year < 0) set_datestruct.Month=0;
-					if (set_datestruct.Year > 99) set_datestruct.Month=99;
+					if (set_datestruct.Date+en_count < 1) set_datestruct.Date=set_datestruct.Date+31+en_count;
+					else{
+						set_datestruct.Date=set_datestruct.Date+en_count;
+					}
+					if (set_datestruct.Date > 31) set_datestruct.Date-=31;
+
 				}
 				if (position_x==3){ // last click with encoder
 					HAL_RTC_SetDate(&hrtc, &set_datestruct, RTC_FORMAT_BIN);
