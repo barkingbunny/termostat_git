@@ -8,31 +8,68 @@
 #include "tim.h"
 #include "global.h"
 #include "rtc.h"
+#include <Time.h>
 
-/** return number after elapsing periode
+
+void get_actual_HAL_tick(void){
+	actual_HALtick.tick = HAL_GetTick();
+	if (past_HALtick.tick > actual_HALtick.tick)
+	{
+		if (past_HALtick.overflow)
+			actual_HALtick.overflow = FALSE;
+		else
+			actual_HALtick.overflow = TRUE;
+
+		past_HALtick.overflow=actual_HALtick.overflow;
+	}
+	past_HALtick.tick=actual_HALtick.tick;
+}
+
+/**
  * Input - number with specific time wait - in MILISECOND
  *
  *  */
-uint32_t fill_comparer (uint32_t periode){
-	uint32_t x_compare;
-	x_compare = HAL_GetTick()+periode;
-	return (x_compare);
+uint8_t fill_comparer (uint32_t periode, Compare_t* comparer_struct){
+
+	get_actual_HAL_tick();
+	comparer_struct->tick = actual_HALtick.tick+periode;
+	comparer_struct->overflow = actual_HALtick.overflow;
+	if (comparer_struct->tick < actual_HALtick.tick) {
+		comparer_struct->overflow=TRUE;
+	}
+	return (1);
 }
 /**
  * input: number for delay in Second
  */
-uint32_t fill_comparer_seconds(uint16_t periode){
-	uint32_t x_compare;
-	x_compare = periode*1000 + HAL_GetTick();
-	return (x_compare);
+uint8_t fill_comparer_seconds(uint16_t periode, Compare_t* comparer_struct){
+	get_actual_HAL_tick();
+	comparer_struct->tick = periode*1000+ actual_HALtick.tick;
+	comparer_struct->overflow = actual_HALtick.overflow;
+	if (comparer_struct->tick < actual_HALtick.tick) {
+		comparer_struct->overflow=TRUE;
+	}
+	return (1);
 
 }
-/*
-uint32_t fill_comparer (uint16_t periode){
-	uint32_t x_compare;
-	x_compare = periode + hrtc->Instance->TR;
 
-	return (x_compare);
+/* This function detect if the comparer value was reached by the HAL ticks
+ *
+ */
+
+Bool comparer_timeout(Compare_t* comparer_struct){
+	if(comparer_struct->tick <= actual_HALtick.tick){
+		if ( comparer_struct->overflow == actual_HALtick.overflow){
+			return (TRUE);
+		}
+		else
+			return (FALSE);
+	}
+	else
+	{
+		if ( comparer_struct->overflow != actual_HALtick.overflow)
+			return(TRUE);
+	}
+	return (FALSE);
 }
 
-*/

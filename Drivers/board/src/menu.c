@@ -8,10 +8,11 @@
 #include "MenuDef.h"
 #include "menu.h"
 #include "rtc_api.h" // for working with RTC
+#include <Time.h>
 //#include "usbd_cdc_if.h"
 
 menu_item_t* ActualMenu;
-uint32_t menu_compare;
+Compare_t menu_compare;
 int8_t position=0, position_x=0;
 int8_t EN_count=-1;
 int32_t set_temperature=2000;
@@ -21,8 +22,8 @@ RTC_DateTypeDef set_datestruct;
 
 
 uint8_t activation_memu(){
-
-	menu_compare = HAL_GetTick()+MENU_TIMOUT;
+	menu_compare.overflow = actual_HALtick.overflow;
+	fill_comparer(MENU_TIMOUT, &menu_compare);
 	position=0;
 	position_x=0;
 	EN_count=-1;
@@ -47,7 +48,7 @@ uint8_t menu_action(){
 	lcd_printString(buffer_s);
 
 	if (flags.enc_changed) // move by encoder was detected - action on displai
-				menu_compare = HAL_GetTick()+MENU_TIMOUT;	//enlarge time in menu
+			fill_comparer(MENU_TIMOUT, &menu_compare);	//enlarge time in menu
 
 			switch (ActualMenu->action)
 			{
@@ -257,7 +258,7 @@ uint8_t menu_action(){
 				lcd_setCharPos(3,0);
 				lcd_printString(buffer_menu5);
 				HAL_Delay(1000);
-				menu_compare = HAL_GetTick()+1500; // Pri cteni mi vyprsel cas pro menu. tak ho zvetsuji.
+				fill_comparer(1500, &menu_compare); // Pricteni mi vyprsel cas pro menu. tak ho zvetsuji.
 
 				if (pushed_button == BUT_ENC){
 					flags_log.read_request=FALSE;
@@ -297,7 +298,8 @@ uint8_t menu_action(){
 }
 
 Bool menu_timout(void){
-	if(HAL_GetTick() < menu_compare){
+	if(comparer_timeout(&menu_compare))
+	{
 		return TRUE;
 	}
 	return FALSE;
@@ -431,3 +433,7 @@ void display_menu(menu_item_t* display_menu) {
 			lcd_printString("Back");
 	}
 }// end function
+
+void menu_comparer_overflow_erase(void){
+	menu_compare.overflow=FALSE;
+}

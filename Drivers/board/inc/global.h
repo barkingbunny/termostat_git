@@ -11,7 +11,13 @@
 #include "stm32l0xx_hal.h"
 
 #define DEBUG_TERMOSTAT 		// debug of the code is turned ON!
-#define SW_VERSION 242 //verze softwaru
+#define SW_VERSION 247 //verze softwaru
+/**
+ *
+ *
+   text	   data	    bss	    dec	    hex	filename
+  34164	   1072	   9984	  45220	   b0a4
+ */
 
 #define BUT_DELAY 1		// in milisecond - I want to read it quckly
 #define MAIN_LOOP 25		// in milisecond

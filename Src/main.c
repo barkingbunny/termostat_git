@@ -139,7 +139,7 @@ int main(void)
 	uint16_t T_led=20;
 
 
-	uint32_t actual_HALtick=0;
+	actual_HALtick.tick=0, past_HALtick.tick=0 ;
 	uint32_t InputVoltage=0;
 	uint8_t en_count_last=0;
 	int16_t count1;
@@ -151,7 +151,11 @@ int main(void)
 	//debug
 
 	//timeouts
-	uint32_t backlite_compare, measure_compare, led_compare,time_compare, button_compare, heating_compare,logging_compare, show_timeout, heating_instant_timeout;
+	Compare_t backlite_compare, measure_compare, led_compare, time_compare, button_compare, heating_compare, logging_compare, show_timeout, heating_instant_timeout;
+	backlite_compare.overflow=FALSE , measure_compare.overflow=FALSE, led_compare.overflow=FALSE, time_compare.overflow=FALSE, button_compare.overflow=FALSE, heating_compare.overflow=FALSE, logging_compare.overflow=FALSE, show_timeout.overflow=FALSE, heating_instant_timeout.overflow=FALSE;
+	actual_HALtick.overflow = FALSE;
+	past_HALtick.overflow = FALSE;
+	//uint32_t backlite_compare, measure_compare, led_compare,time_compare, button_compare, heating_compare,logging_compare, show_timeout, heating_instant_timeout;
 
 	/* USER CODE END Init */
 
@@ -174,7 +178,7 @@ int main(void)
 
 	/* USER CODE BEGIN 2 */
 	backliteOn();
-	backlite_compare = fill_comparer(BACKLITE_TIMEOUT);
+	fill_comparer(BACKLITE_TIMEOUT, &backlite_compare);
 
 	lcd12864_init(&hspi1);
 	line(0,60,110,60,1);
@@ -208,20 +212,18 @@ int main(void)
 
 
 	//init timers
-	led_compare = fill_comparer(LED_PERIODE);
-	measure_compare = fill_comparer(MEASURE_PERIODE);
-	time_compare = fill_comparer(TIME_PERIODE);
-	button_compare = fill_comparer(BUT_DELAY);
-	heating_compare = fill_comparer(10); // check it immediately
-	logging_compare = fill_comparer_seconds(LOG_PERIODE);
+	fill_comparer(LED_PERIODE,&led_compare);
+	fill_comparer(MEASURE_PERIODE,&measure_compare);
+	fill_comparer(TIME_PERIODE,&time_compare);
+	fill_comparer(BUT_DELAY, &button_compare);
+	fill_comparer(10, &heating_compare); // check it immediately
+	fill_comparer_seconds(MEASURE_PERIODE, &logging_compare); // chci zapisovat hned po zmereni hodnot
 #ifdef DEBUG_TERMOSTAT
-logging_compare = fill_comparer_seconds(2);
+fill_comparer_seconds(2, &logging_compare);
 #endif
-	show_timeout = 0xfffffffe;
-	heating_instant_timeout = 0;
+	show_timeout.tick = 0xfffffffe;
+	heating_instant_timeout.tick = 0;
 
-
-	// NEW ADDED
 	/*##- 4- Start the conversion process #######################################*/
 	if (HAL_ADC_Start(&hadc) != HAL_OK)
 	{
@@ -258,7 +260,7 @@ logging_compare = fill_comparer_seconds(2);
 
 			flags.new_data_to_show=TRUE;
 
-			measure_compare = fill_comparer(MEASURE_PERIODE);
+			fill_comparer(MEASURE_PERIODE, &measure_compare);
 			break;
 		}
 		case VOLTAGE:
@@ -291,7 +293,8 @@ logging_compare = fill_comparer_seconds(2);
 		case HEATING:
 		{
 			if (flags.heating_instant){
-				if(heating_instant_timeout > actual_HALtick)
+				//if(heating_instant_timeout.tick > actual_HALtick)
+					if(!comparer_timeout(&heating_instant_timeout))
 					turnOnHeater(temperature);
 				else
 					flags.heating_instant=FALSE;
@@ -322,7 +325,7 @@ logging_compare = fill_comparer_seconds(2);
 
 				}
 			}
-			heating_compare = fill_comparer(HEATING_PERIODE);
+			fill_comparer(HEATING_PERIODE, &heating_compare);
 			current_state = IDLE;
 			break;
 		}
@@ -334,7 +337,7 @@ logging_compare = fill_comparer_seconds(2);
 				Log_Temperature(&hrtc, temperature, humid);
 
 			}
-			logging_compare = fill_comparer_seconds(LOG_PERIODE);
+			fill_comparer_seconds(LOG_PERIODE, &logging_compare);
 			current_state = IDLE;
 			break;
 		}
@@ -425,17 +428,17 @@ logging_compare = fill_comparer_seconds(2);
 				lcd_printString(buffer_s);
 */
 				lcd_setCharPos(7,9);
-				snprintf(buffer_s, 13, "sys%8ld;",actual_HALtick);
+				snprintf(buffer_s, 13, "sys%8ld;",actual_HALtick.tick);
 				lcd_printString(buffer_s);
 
 				lcd_setCharPos(6,12);
-				snprintf(buffer_s, 10, "%8ld;",backlite_compare);
+				snprintf(buffer_s, 10, "%8ld;",backlite_compare.tick);
 				lcd_printString(buffer_s);
 
 				//debug
 #endif
 				// end of the time part - new timer set.
-				time_compare = fill_comparer(TIME_PERIODE);
+				fill_comparer(TIME_PERIODE, &time_compare);
 				show_time = FALSE;
 			}
 			break;
@@ -500,32 +503,32 @@ logging_compare = fill_comparer_seconds(2);
 		 */
 
 		/* *------ TIME ELAPSING CHECK -------* */
-		actual_HALtick = HAL_GetTick();
-		if(logging_compare <= actual_HALtick) //log data after defined periode.
+		get_actual_HAL_tick(); // put the actual number of ms counter to variable actual_HALtic.tick
+
+		if(comparer_timeout(&logging_compare)) //log data after defined period.
 		{
 			current_state = LOG;
 		}
-		if(heating_compare <= actual_HALtick) //measure after defined periode.
+		if(comparer_timeout(&heating_compare)) //measure after defined period.
 		{
 			current_state = HEATING;
 		}
-
-		if(measure_compare <= actual_HALtick) //measure after defined periode.
+		if (comparer_timeout(&measure_compare))  //measure after defined period.
 		{
 			current_state = MEASURING;
 		}
-
-		if(time_compare <= actual_HALtick) //change time after defined periode.
+		if(comparer_timeout(&time_compare)) //change time after defined period.
 		{
 			show_time = TRUE;
 		}
-		if(show_timeout <= actual_HALtick) //change time after defined periode.
+
+		if(comparer_timeout(&show_timeout)) //change time after defined period.
 		{
 			show = desktop;
 		}
 // MENU TIMEOUT
 		if ((TRUE==flags.menu_running)) // je to takhle slozite , protoze jsem neprisel na jiny efektivni zpusob, jak smazat displej, po zkonceni menu
-			if(menu_timout()) {
+			if(!menu_timout()) {
 				if (!menu_action()){ // exit from menu condition
 					flags.menu_running=0;
 					lcd_clear();
@@ -550,7 +553,8 @@ logging_compare = fill_comparer_seconds(2);
   				led_compare=fill_comparer(LED_PERIODE);
   			}//if BLIK LEDka
 		 */
-		if (backlite_compare <= actual_HALtick) // shut down the backligh
+		//if (backlite_compare.tick <= actual_HALtick) // shut down the backligh
+		if (comparer_timeout(&backlite_compare))
 		{
 			backliteOff();
 		}
@@ -558,10 +562,10 @@ logging_compare = fill_comparer_seconds(2);
 		/* *---- READ KEYBOARD -----* */
 
 		pushed_button = BUT_NONE;
-		if(button_compare<=actual_HALtick) //every delay time
+		if(comparer_timeout(&button_compare)) //every delay time
 		{
 			pushed_button = checkButtons();
-			button_compare = fill_comparer(BUT_DELAY);
+			fill_comparer(BUT_DELAY, &button_compare);
 			//flags.enc_changed = FALSE;
 			// reading the actual number from encoder
 			uint32_t actual_counter_CNT = htim22.Instance->CNT;
@@ -576,9 +580,9 @@ logging_compare = fill_comparer_seconds(2);
 		if(pushed_button != BUT_NONE) // any button pushed?
 		{
 			backliteOn();
-			button_compare = fill_comparer(BUT_DELAY*200); // 200x - zpozdeni cteni pri stisknuti
-			backlite_compare = fill_comparer(BACKLITE_TIMEOUT);
-			show_timeout = fill_comparer(SHOW_TIMEOUT);
+			fill_comparer(BUT_DELAY*200, &button_compare); // 200x - zpozdeni cteni pri stisknuti
+			fill_comparer(BACKLITE_TIMEOUT, &backlite_compare);
+			fill_comparer(SHOW_TIMEOUT, &show_timeout);
 		}
 
 		// -- BUTTON PROCCESS
@@ -603,7 +607,7 @@ logging_compare = fill_comparer_seconds(2);
 		{// Immediattely heating for 15 minutes
 
 			flags.heating_instant = TRUE;
-			heating_instant_timeout = fill_comparer_seconds(HEATING_INSTANT);
+			fill_comparer_seconds(HEATING_INSTANT, &heating_instant_timeout);
 			break;
 		}
 		case BUT_ENC:
