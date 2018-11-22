@@ -28,7 +28,7 @@
 #define LOG_PERIODE 1200 // in seconds - every 10 minute check for change - turn on / off heater
 
 #ifdef DEBUG_TERMOSTAT
-	#define LOG_PERIODE 10
+	#define LOG_PERIODE 120
 #endif
 
 #define HEATING_INSTANT 900 // in seconds for 15 minutes is turned on the instant heating
