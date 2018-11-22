@@ -9,3 +9,6 @@
 #include "heater.h"
 
 
+void hrej(void){
+	HAL_Delay(1000);
+}

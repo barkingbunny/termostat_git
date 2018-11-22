@@ -210,7 +210,7 @@ int main(void)
 	show=desktop;
 	flags.log_enable = TRUE; // logging of the actions
 
-
+hrej();
 	//init timers
 	fill_comparer(LED_PERIODE,&led_compare);
 	fill_comparer(MEASURE_PERIODE,&measure_compare);
