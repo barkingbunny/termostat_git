@@ -1,6 +1,6 @@
 /*
  * menu.h
- *
+ *  projekt - TERMOSTAT
  *  Created on: Jan 23, 2017
  *      Author: jakub
  */

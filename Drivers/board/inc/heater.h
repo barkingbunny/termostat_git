@@ -1,6 +1,6 @@
 /*
  * heater.h
- *
+ *  projekt - TERMOSTAT
  *  Created on: 20 Nov 2018
  *      Author: js31
  */

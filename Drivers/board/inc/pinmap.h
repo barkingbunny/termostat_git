@@ -1,6 +1,7 @@
 /*
  * Pinmap.h
  * In this file would be included all input/output signal and their names.
+ *  projekt - TERMOSTAT
  *  Created on: Dec 2, 2016
  *      Author: jakub
  */

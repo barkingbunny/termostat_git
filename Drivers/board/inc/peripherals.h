@@ -1,6 +1,6 @@
 /*
  * peripherals.h
- *
+ *  projekt - TERMOSTAT
  *  Created on: Dec 29, 2016
  *      Author: jakub
  */

@@ -422,11 +422,7 @@ fill_comparer_seconds(2, &logging_compare);
 					lcd_printString("-");
 					beta_part = TRUE;
 				}
-/* Time of the working the unit.
-				lcd_setCharPos(7,0);
-				snprintf(buffer_s, 9, "%ld;",hrtc.Instance->TR);
-				lcd_printString(buffer_s);
-*/
+
 				lcd_setCharPos(7,9);
 				snprintf(buffer_s, 13, "sys%8ld;",actual_HALtick.tick);
 				lcd_printString(buffer_s);

@@ -1,6 +1,6 @@
 /*
  * global.h
- *
+  projekt - TERMOSTAT
  *  Created on: Dec 29, 2016
  *      Author: jakub
  */
@@ -10,8 +10,8 @@
 
 #include "stm32l0xx_hal.h"
 
-#define DEBUG_TERMOSTAT 		// debug of the code is turned ON!
-#define SW_VERSION 247 //verze softwaru
+//#define DEBUG_TERMOSTAT 		// debug of the code is turned ON!
+#define SW_VERSION 248 //verze softwaru
 /**
  *
  *
