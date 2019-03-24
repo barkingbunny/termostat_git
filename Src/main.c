@@ -394,10 +394,12 @@ fill_comparer_seconds(2, &logging_compare);
   					snprintf(buffer_s, 18, "Pres %d.%02d hp",presure/100,presure%100);
   					lcd_printString(buffer_s);
 				 */
+
+#ifdef DEBUG_TERMOSTAT	//debug
 				lcd_setCharPos(6,0);
 				snprintf(buffer_s, 13, "%lu-> %lu.%02luV",InputVoltage,InputVoltage*66/2550,(InputVoltage*66%2550*100/255)/10 );// get two numbers for voltage
 				lcd_printString(buffer_s);
-
+#endif
 				flags.new_data_to_show=FALSE; // the data was showed.
 
 

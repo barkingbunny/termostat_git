@@ -10,7 +10,7 @@
 
 #include "stm32l0xx_hal.h"
 
-//#define DEBUG_TERMOSTAT 		// debug of the code is turned ON!
+#define DEBUG_TERMOSTAT 		// debug of the code is turned ON!
 #define SW_VERSION 248 //verze softwaru
 /**
  *
@@ -25,7 +25,7 @@
 #define LED_PERIODE 500 //
 #define TIME_PERIODE 400 // ms definition of periode for checking time change (RTC change )
 #define HEATING_PERIODE 1000 // every 5 minute check for change - turn on / off heater
-#define LOG_PERIODE 1200 // in seconds - every 10 minute check for change - turn on / off heater
+#define LOG_PERIODE 1200 // in seconds - every  minute check for change - turn on / off heater
 
 #ifdef DEBUG_TERMOSTAT
 	#define LOG_PERIODE 120
