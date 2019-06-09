@@ -132,13 +132,10 @@ int main(void)
 	HAL_Init();
 
 	/* USER CODE BEGIN Init */
-
 	char buffer_s [32];
-	char buffer_usb [32];
+//char buffer_usb [32];
 
 	uint16_t T_led=20;
-
-
 	actual_HALtick.tick=0, past_HALtick.tick=0 ;
 	uint32_t InputVoltage=0;
 	uint8_t en_count_last=0;
@@ -197,8 +194,9 @@ int main(void)
 	BME280_init(&hi2c1,DEFAULT_SLAVE_ADDRESS); // initialization of temp/humid sensor BOSH
 	Log_Init(); // initialization of the logging, each LOG_PERIODE second would be logged the data
 
-	sprintf(buffer_usb, "Hello World, ahha123456");
-	CDC_Transmit_FS(buffer_usb,25);
+//	sprintf(buffer_usb, "Hello World, ahha123456");
+//	CDC_Transmit_FS(buffer_usb,25);
+
 
 	HAL_Delay(1700);
 	lcd_clear();
@@ -266,6 +264,7 @@ fill_comparer_seconds(2, &logging_compare);
 		case VOLTAGE:
 
 		{
+
 			/*##- 5- Wait for the end of conversion #####################################*/
 			/*  Before starting a new conversion, you need to check the current state of
   			         the peripheral; if it�s busy you need to wait for the end of current

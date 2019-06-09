@@ -72,4 +72,13 @@ Bool comparer_timeout(Compare_t* comparer_struct){
 	}
 	return (FALSE);
 }
+/**
+ * Tehle funkce vraci, zda ma v dany cas byt periferie - ON - TRUE nebo OFF - FALSE
+ */
+Bool timer_value(uint16_t timer_index){
+	Bool timer_val = FALSE;
+///// DOPSAT NENI TO HOTOVE
+
+	return timer_val;
+}
 
