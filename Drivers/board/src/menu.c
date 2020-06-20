@@ -200,30 +200,19 @@ uint8_t menu_action(){
 						{
 				char buffer_menu [32];
 				uint8_t post = 0;
+
+				//LCD vypis
 				lcd_clear();
 				lcd_setCharPos(1,1);
 				snprintf(buffer_menu, 16, "Vypisuji na USB");
 				lcd_printString(buffer_menu);
-
-
-				uint8_t buffer_menu2 [16] = "Vypisuji na USB";
-				char buffer_menu3 [32];
-
-				post = CDC_Transmit_FS(&buffer_menu2[0],16);
-
-				lcd_setCharPos(0,4);
-				snprintf(buffer_menu, 12, "return %i", post);
-				lcd_printString(buffer_menu);
+				// konec lcd vypisu
+				USB_transmit(&buffer_menu[0],16);
 
 				for (uint16_t index=0; index<LOG_DATA_LENGTH; index++) {
-
-					snprintf(buffer_menu3, 21, "%02i;%02u;%02u;%03ld.%02d;%3ld%\r\n ", index, log_data[index].hour,log_data[index].minute,log_data[index].temp_1/100, abs(log_data[index].temp_1%100), (log_data[index].hum_1));
-					for (int j=0; j<32;j++){
-						buffer_menu2[j] = (uint8_t *)buffer_menu3[j];
-					}
-					CDC_Transmit_FS(&buffer_menu2[0],21);
+					snprintf(buffer_menu, 21, "%02i;%02u;%02u;%03ld.%02d;%3ld%\r\n ", index, log_data[index].hour,log_data[index].minute,log_data[index].temp_1/100, abs(log_data[index].temp_1%100), (log_data[index].hum_1));
+					USB_transmit(&buffer_menu[0],21);
 				}
-
 
 				return 0; //exit menu
 
