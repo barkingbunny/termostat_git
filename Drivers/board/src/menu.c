@@ -199,51 +199,31 @@ uint8_t menu_action(){
 			case (printLogUSB):
 						{
 				char buffer_menu [32];
+				uint8_t post = 0;
 				lcd_clear();
 				lcd_setCharPos(1,1);
 				snprintf(buffer_menu, 16, "Vypisuji na USB");
 				lcd_printString(buffer_menu);
-		//debug
+
 
 				uint8_t buffer_menu2 [16] = "Vypisuji na USB";
 				char buffer_menu3 [32];
-				//snprintf(buffer_menu, 16, "Vypisuji na USB");
-			/*	post = CDC_Transmit_FS(buffer_menu2,16);
+
+				post = CDC_Transmit_FS(&buffer_menu2[0],16);
 
 				lcd_setCharPos(0,4);
 				snprintf(buffer_menu, 12, "return %i", post);
 				lcd_printString(buffer_menu);
-*/
-				//buffer_menu2 = "\r\n";
-				//CDC_Transmit_FS(buffer_menu2,5);
-				/*snprintf(buffer_menu, 30, "i; hours; min; temp; humid\r\n");
-				CDC_Transmit_FS(buffer_menu,30);
-				/*buffer_menu2 = "i; hours; min; temp; humid\r\n";
-				CDC_Transmit_FS(buffer_menu2,30);
-				buffer_menu2 = "\r\n";   // pouze odradkovani a zformatovani
-				CDC_Transmit_FS(buffer_menu2,5);
-		//debug
-				 snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
-				 post = CDC_Transmit_FS(buffer_menu,5);
-				 snprintf(buffer_menu, 9, "return %d", post);
-				 lcd_printString(buffer_menu);
-				 snprintf(buffer_menu, 1, " ");
-				 snprintf(buffer_menu, 30, "i; hours; min; temp; humid\r\n");
-				 post = CDC_Transmit_FS(buffer_menu,30);
-				 snprintf(buffer_menu, 9, "return %d", post);
-				 lcd_printString(buffer_menu);
-				 snprintf(buffer_menu, 5, "\r\n");   // pouze odradkovani a zformatovani
-				 post = CDC_Transmit_FS(buffer_menu,5);
-				 snprintf(buffer_menu, 9, "return %d", post);
-				 lcd_printString(buffer_menu);
 
-*/
+				for (uint16_t index=0; index<LOG_DATA_LENGTH; index++) {
 
+					snprintf(buffer_menu3, 21, "%02i;%02u;%02u;%03ld.%02d;%3ld%\r\n ", index, log_data[index].hour,log_data[index].minute,log_data[index].temp_1/100, abs(log_data[index].temp_1%100), (log_data[index].hum_1));
+					for (int j=0; j<32;j++){
+						buffer_menu2[j] = (uint8_t *)buffer_menu3[j];
+					}
+					CDC_Transmit_FS(&buffer_menu2[0],21);
+				}
 
-				//				for (uint16_t index=0; index<LOG_ARRAY; index++) {
-				//					snprintf(buffer_menu, 25, "%03i;%02u;%02u;%3ld.%02d;%2ld.%02ld\r\n ", index, log_hour[index],log_min[index],log_temperature[index]/100, abs(log_temperature[index]%100), (log_humid[index]/ 1024), (log_humid[index]%1024*100/1024));
-				//					CDC_Transmit_FS(buffer_menu,25);
-				//				}
 
 				return 0; //exit menu
 

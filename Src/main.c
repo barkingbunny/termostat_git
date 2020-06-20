@@ -196,10 +196,6 @@ int main(void)
 	BME280_init(&hi2c1,DEFAULT_SLAVE_ADDRESS); // initialization of temp/humid sensor BOSH
 	Log_Init(); // initialization of the logging, each LOG_PERIODE second would be logged the data
 
-//	sprintf(buffer_usb, "Hello World, ahha123456");
-//	CDC_Transmit_FS(buffer_usb,25);
-
-
 	HAL_Delay(1700);
 	lcd_clear();
 
@@ -255,9 +251,6 @@ fill_comparer_seconds(2, &logging_compare);
 			temperature=BME280_getTemperature();
 			humid=BME280_getHumidity();
 		//	presure=BME280_getPressure();
-	// SMAZAT pro debug
-togleLED(LED1);
-/////////////SMAZAT....
 
 			current_state = VOLTAGE;
 
