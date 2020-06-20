@@ -575,7 +575,7 @@ fill_comparer_seconds(2, &logging_compare);
 		if(pushed_button != BUT_NONE) // any button pushed?
 		{
 			backliteOn();
-			fill_comparer(BUT_DELAY*20, &button_compare); // 20x - zpozdeni cteni pri stisknuti (200x bylo az az)
+			fill_comparer(BUT_DELAY*200, &button_compare); // 20x - zpozdeni cteni pri stisknuti
 			fill_comparer(BACKLITE_TIMEOUT, &backlite_compare);
 			fill_comparer(SHOW_TIMEOUT, &show_timeout);
 		}
