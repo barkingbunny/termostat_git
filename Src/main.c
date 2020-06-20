@@ -84,6 +84,8 @@
 #include "log.h"
 #include "sleep.h"
 #include "waiter.h"
+#include "heater.h"
+
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -253,6 +255,9 @@ fill_comparer_seconds(2, &logging_compare);
 			temperature=BME280_getTemperature();
 			humid=BME280_getHumidity();
 		//	presure=BME280_getPressure();
+	// SMAZAT pro debug
+togleLED(LED1);
+/////////////SMAZAT....
 
 			current_state = VOLTAGE;
 
@@ -524,8 +529,8 @@ fill_comparer_seconds(2, &logging_compare);
 			show = desktop;
 		}
 // MENU TIMEOUT
-		if ((TRUE==flags.menu_running)) // je to takhle slozite , protoze jsem neprisel na jiny efektivni zpusob, jak smazat displej, po zkonceni menu
-			if(!menu_timout()) {
+		if (TRUE==flags.menu_running) // je to takhle slozite , protoze jsem neprisel na jiny efektivni zpusob, jak smazat displej, po zkonceni menu
+			if (!menu_timout()) {
 				if (!menu_action()){ // exit from menu condition
 					flags.menu_running=0;
 					lcd_clear();
