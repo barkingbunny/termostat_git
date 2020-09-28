@@ -232,7 +232,7 @@ void character(uint8_t x, uint8_t y, char c){
 	unsigned char z,w;
 
 
-	if ((c < 31) || (c > 127)){ return;}   // test char range
+	if ((c < 31) || (c > 132)){ return;}   // test char range
 	// read font parameter from start of array
 	offset = font[0];                    // bytes / char
 	hor = font[1];                       // get hor size of font

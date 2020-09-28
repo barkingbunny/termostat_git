@@ -42,31 +42,35 @@ uint8_t activation_memu(){
  *
  */
 uint8_t menu_action(){
+#ifdef DEBUG_TERMOSTAT
 	lcd_setCharPos(7,14);
 	char buffer_s [32];
 	snprintf(buffer_s, 12, "enc%03i", (en_count));
 	lcd_printString(buffer_s);
+#endif
 
-	if (flags.enc_changed) // move by encoder was detected - action on displai
+	if (flags.enc_changed) // move by encoder was detected - action on display
 			fill_comparer(MENU_TIMOUT, &menu_compare);	//enlarge time in menu
 
 			switch (ActualMenu->action)
 			{
 			case (next):
 						{
-				if (flags.enc_changed){ // move by encoder was detected - action on dipley
+				if (flags.enc_changed){ // move by encoder was detected - action on display
 					position = en_count;
 					if ((position) < 0)
 						en_count = 0;
 					if ((position) > ActualMenu->numberOfChoices)
 						en_count = ActualMenu->numberOfChoices;
 					position = en_count;
+					for (uint8_t j = 0; j<8;j++){
+						lcd_setCharPos(j,0);
+						_putc(' ');
+						_putc(' ');
+					}
 					lcd_setCharPos((position+1),0);
-					_putc('>');
-					lcd_setCharPos((position+2),0);
-					_putc(' ');
-					lcd_setCharPos((position),0);
-					_putc(' ');
+					_putc(0x083);
+					_putc(0x084);
 					copy_to_lcd();
 					flags.enc_changed = FALSE;
 				}//if COUNTER!=0
@@ -200,6 +204,7 @@ uint8_t menu_action(){
 						{
 				char buffer_menu [32];
 				uint8_t post = 0;
+				uint8_t usbTransmit=0;
 
 				//LCD vypis
 				lcd_clear();
@@ -220,11 +225,17 @@ uint8_t menu_action(){
 
 				for (uint16_t index=0; index<LOG_DATA_LENGTH; index++) {
 
-					snprintf(buffer_menu3, 21, "%02i;%02u;%02u;%03ld.%02d;%3ld%\r\n ", (index+1), log_data[index].hour,log_data[index].minute,log_data[index].temp_1/100, abs(log_data[index].temp_1%100), (log_data[index].hum_1));
+					snprintf(buffer_menu3, 27, "%02i;%02u;%02u;%02u;%02u;%03ld.%02d;%3ld%\r\n ", (index+1), log_data[index].month, log_data[index].day, log_data[index].hour,log_data[index].minute,log_data[index].temp_1/100, abs(log_data[index].temp_1%100), (log_data[index].hum_1));
 					for (int j=0; j<32;j++){
 						buffer_menu2[j] = (uint8_t *)buffer_menu3[j];
 					}
-					CDC_Transmit_FS(&buffer_menu2[0],21);
+					{
+					HAL_Delay(3);
+					usbTransmit = CDC_Transmit_FS(&buffer_menu2[0],27);
+					//if(usbTransmit==USBD_BUSY) HAL_Delay(500);
+					/*mel jsem problem, ze se pri vypisovani USB dostavalo do BUSY modu. Bylo hodne dat a nemel jsem Delay funkci. Tak busy bylo porad.*/
+					}while (usbTransmit==USBD_BUSY);
+
 				}
 				return 0; //exit menu
 
@@ -250,6 +261,24 @@ uint8_t menu_action(){
 
 				break;
 						}
+
+			case(eraseLogMem):
+				{
+				char buffer_menu [32];
+				//LCD vypis
+				lcd_clear();
+				lcd_setCharPos(3,1);
+				snprintf(buffer_menu, 16, "Log memory - erased");
+				lcd_printString(buffer_menu);
+
+				//vymzani logovaci databaze/pameti
+				Log_errase_database();
+
+				HAL_Delay(1000);
+
+				return 0;//exit menu, finished
+				break;
+				}
 
 			case (menuReset):
 				{

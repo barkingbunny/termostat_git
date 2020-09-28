@@ -189,11 +189,11 @@ void Log_errase_database(void){
 	} // end FOR
 
 }
-/**this function return number of data in the database
+/**Return number of recorded data in the database
  *
  */
 uint16_t Log_memory_fullness(void){
-	uint16_t log_occupate =0;
+	uint16_t log_occupate = 0;
 	for (uint16_t index=0; index<LOG_DATA_LENGTH; index++){
 		if(0 != log_data[index].day)
 			log_occupate++;

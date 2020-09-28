@@ -11,7 +11,7 @@
 #include "stm32l0xx_hal.h"
 
 //#define DEBUG_TERMOSTAT 		// debug of the code is turned OFF
-#define SW_VERSION 253 //verze softwaru
+#define SW_VERSION 255 //verze softwaru
 /**
  *
  *
@@ -21,6 +21,7 @@
   33880	   1072	   9792	  44744	   aec8	termostat_git.elf
   33904	   1072	  14592	  49568	   c1a0	termostat_git.elf   // logovani size  - RAM pamet -  0x1ff
   33904	   1072	  17152	  52128	   cba0	termostat_git.elf   // logovani size - RAM pamet - 0x2ff
+
  */
 
 #define BUT_DELAY 1		// in milisecond - I want to read it quckly

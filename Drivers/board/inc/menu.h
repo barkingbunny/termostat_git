@@ -31,7 +31,8 @@ typedef enum EnSetMenu_t{
 	next,
 	menuReset,
 	printLogLCD,
-	information
+	information,
+	eraseLogMem
 } EnSetMenu;
 
 typedef struct menu_item_s{

@@ -49,7 +49,7 @@
  * Upravena verze pro termostat a logovani USB
  * date : 28.9.2020
  * Testovani v provozu - 28.9.2020
- * /
+ */
 
 /* Includes ------------------------------------------------------------------ */
 
@@ -145,7 +145,7 @@ int main(void)
 	uint32_t InputVoltage=0;
 	uint8_t en_count_last=0;
 	int16_t count1;
-
+	uint16_t sirka=0;
 	char aShowTime[50] = {0};
 
 	//debug
@@ -250,9 +250,10 @@ hrej();
 			temperature=BME280_getTemperature();
 			humid=BME280_getHumidity();
 		//	presure=BME280_getPressure();
-
+			current_state = IDLE;
+#ifdef DEBUG_TERMOSTAT	//debug
 			current_state = VOLTAGE;
-
+#endif
 			flags.new_data_to_show=TRUE;
 
 			fill_comparer(MEASURE_PERIODE, &measure_compare);
@@ -334,6 +335,7 @@ hrej();
 
 			}
 			fill_comparer_seconds(LOG_PERIODE, &logging_compare);
+			sirka = Log_memory_fullness()*lcd_width/LOG_DATA_LENGTH;
 			current_state = IDLE;
 			break;
 		}
@@ -398,6 +400,14 @@ hrej();
 #endif
 				flags.new_data_to_show=FALSE; // the data was showed.
 
+/* Ukazka plnosti pameti na logovani */
+				// cara bude na spodni strane a bude tri tecky siroka
+				{
+					line(0,62,sirka,62,1);
+	/*				line(0,63,sirka,63,1);
+					line(0,64,sirka,64,1);
+*/
+				}
 
 			}// end if - new data to show
 			if (show_time){
@@ -421,14 +431,14 @@ hrej();
 					beta_part = TRUE;
 				}
 
-				lcd_setCharPos(7,9);
+		/*		lcd_setCharPos(7,9);
 				snprintf(buffer_s, 13, "sys%8ld;",actual_HALtick.tick);
 				lcd_printString(buffer_s);
 
 				lcd_setCharPos(6,12);
 				snprintf(buffer_s, 10, "%8ld;",backlite_compare.tick);
 				lcd_printString(buffer_s);
-
+		 */
 				//debug
 #endif
 				// end of the time part - new timer set.
@@ -599,6 +609,7 @@ hrej();
 		}
 		case BUT_ENC:
 		{
+			flags.enc_changed = TRUE; // jenom pomoc aby se zobrazila sipka vzdy...
 			if (0 == flags.menu_running){
 				flags.menu_activate=1;
 				en_count = 0;
@@ -606,6 +617,7 @@ hrej();
 				htim22.Instance->CNT= 0;
 				activation_memu();
 				lcd_clear();
+
 				// if this command means go to menu, That there shouldn't be no more pressed.
 				pushed_button = BUT_NONE;
 			}
