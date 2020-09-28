@@ -17,15 +17,6 @@
 uint16_t index_log_wr = 0;
 uint16_t index_log_read = 0xfffe;
 
-/**
- * Inicializace databaze - je to nutne na zacatku
- */
-void Log_Init(){
-	flags_log.read_request = FALSE;
-// delete complete variable log_data
-	Log_errase_database();
-} // end Log_Init
-
 uint8_t Log_Data(RTC_HandleTypeDef* RtcHandle, int16_t temperature, int16_t humidity, int16_t pressure, uint16_t diagnostics)
 {
 	char TimeMark[25] = {0};
@@ -178,8 +169,14 @@ uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght){
 }
 
 /**
- * Vymazani databaze
+ * Inicializace databaze - je to nutne na zacatku
  */
+void Log_Init(){
+	flags_log.read_request = FALSE;
+// delete complete variable log_data
+	Log_errase_database();
+} // end Log_Init
+
 void Log_errase_database(void){
 	for (uint16_t index=0; index<LOG_DATA_LENGTH; index++){
 		log_data[index_log_wr].temp_1= 0;

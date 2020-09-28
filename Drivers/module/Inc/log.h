@@ -11,7 +11,7 @@
 #include "pinmap.h"
 #include "global.h"
 
-#define LOG_DATA_LENGTH 31 // number of logged samples
+#define LOG_DATA_LENGTH 0x02ff // number of logged samples (max 16bits)
 
 typedef struct {
 	uint8_t minute;

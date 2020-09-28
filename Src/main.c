@@ -45,8 +45,14 @@
  *
  ******************************************************************************
  */
+/**
+ * Upravena verze pro termostat a logovani USB
+ * date : 28.9.2020
+ * Testovani v provozu - 28.9.2020
+ * /
 
-/* Includes ------------------------------------------------------------------*/
+/* Includes ------------------------------------------------------------------ */
+
 #include "main.h"
 #include "stm32l0xx_hal.h"
 #include "adc.h"
@@ -60,15 +66,11 @@
 /* USER CODE BEGIN Includes */
 
 /**popis
- *
- *Pracuji tedkon na logovani
+ * 28.9.2020 - testovani Logovani
  *
  * Ukoly:
  * pridej MENU, s nastavenim casu a teplot. funkcni
- * pridej logovaci funkci.
- *
- * USB*
- * nastveni - 115200-8-N-1, /dev/ttyACM0
+ * nastveni - 115200-8-N-1, /dev/ttyACM0 // pouzivam "cutecom"
  */
 #include "global.h"
 #include "pinmap.h"
@@ -85,6 +87,7 @@
 #include "sleep.h"
 #include "waiter.h"
 #include "heater.h"
+#include "usb_api.h"
 
 /* USER CODE END Includes */
 
@@ -154,7 +157,7 @@ int main(void)
 	backlite_compare.overflow=FALSE , measure_compare.overflow=FALSE, led_compare.overflow=FALSE, time_compare.overflow=FALSE, button_compare.overflow=FALSE, heating_compare.overflow=FALSE, logging_compare.overflow=FALSE, show_timeout.overflow=FALSE, heating_instant_timeout.overflow=FALSE;
 	actual_HALtick.overflow = FALSE;
 	past_HALtick.overflow = FALSE;
-	//uint32_t backlite_compare, measure_compare, led_compare,time_compare, button_compare, heating_compare,logging_compare, show_timeout, heating_instant_timeout;
+	/* USER CODE BEGIN Init */	
 
 	/* USER CODE END Init */
 
@@ -194,8 +197,7 @@ int main(void)
 	htim22.Instance->CR1 = 1;           // Enable the counter
 
 	BME280_init(&hi2c1,DEFAULT_SLAVE_ADDRESS); // initialization of temp/humid sensor BOSH
-	Log_Init(); // initialization of the logging, each LOG_PERIODE second would be logged the data
-
+	
 	HAL_Delay(1700);
 	lcd_clear();
 
@@ -213,10 +215,7 @@ hrej();
 	fill_comparer(TIME_PERIODE,&time_compare);
 	fill_comparer(BUT_DELAY, &button_compare);
 	fill_comparer(10, &heating_compare); // check it immediately
-	fill_comparer_seconds(MEASURE_PERIODE, &logging_compare); // chci zapisovat hned po zmereni hodnot
-#ifdef DEBUG_TERMOSTAT
-fill_comparer_seconds(2, &logging_compare);
-#endif
+	fill_comparer_seconds(30, &logging_compare); // chci zapisovat hned po zmereni hodnot / ZAPNUTI
 	show_timeout.tick = 0xfffffffe;
 	heating_instant_timeout.tick = 0;
 
@@ -542,14 +541,7 @@ fill_comparer_seconds(2, &logging_compare);
 			flags.temp_new_set = FALSE;
 			show = desktop;
 		}
-		/*
-  			if (led_compare<=actual_HALtick){
-  				togleLED(LED1);
-  				led_compare=fill_comparer(LED_PERIODE);
-  			}//if BLIK LEDka
-		 */
-		//if (backlite_compare.tick <= actual_HALtick) // shut down the backligh
-		if (comparer_timeout(&backlite_compare))
+	if (comparer_timeout(&backlite_compare))
 		{
 			backliteOff();
 		}
@@ -561,7 +553,7 @@ fill_comparer_seconds(2, &logging_compare);
 		{
 			pushed_button = checkButtons();
 			fill_comparer(BUT_DELAY, &button_compare);
-			//flags.enc_changed = FALSE;
+
 			// reading the actual number from encoder
 			uint32_t actual_counter_CNT = htim22.Instance->CNT;
 			if (en_count_last != actual_counter_CNT){
@@ -575,7 +567,7 @@ fill_comparer_seconds(2, &logging_compare);
 		if(pushed_button != BUT_NONE) // any button pushed?
 		{
 			backliteOn();
-			fill_comparer(BUT_DELAY*200, &button_compare); // 20x - zpozdeni cteni pri stisknuti
+			fill_comparer(BUT_DELAY*200, &button_compare); // 200x - zpozdeni cteni pri stisknuti
 			fill_comparer(BACKLITE_TIMEOUT, &backlite_compare);
 			fill_comparer(SHOW_TIMEOUT, &show_timeout);
 		}

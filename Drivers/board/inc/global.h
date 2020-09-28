@@ -10,14 +10,17 @@
 
 #include "stm32l0xx_hal.h"
 
-//#define DEBUG_TERMOSTAT 		// debug of the code is turned ON!
-#define SW_VERSION 252 //verze softwaru
+//#define DEBUG_TERMOSTAT 		// debug of the code is turned OFF
+#define SW_VERSION 253 //verze softwaru
 /**
  *
  *
 
    text	   data	    bss	    dec	    hex	filename
-  34428	   1072	   9792	  45292	   b0ec	termostat_git.elf
+
+  33880	   1072	   9792	  44744	   aec8	termostat_git.elf
+  33904	   1072	  14592	  49568	   c1a0	termostat_git.elf   // logovani size  - RAM pamet -  0x1ff
+  33904	   1072	  17152	  52128	   cba0	termostat_git.elf   // logovani size - RAM pamet - 0x2ff
  */
 
 #define BUT_DELAY 1		// in milisecond - I want to read it quckly
@@ -26,7 +29,7 @@
 #define LED_PERIODE 500 //
 #define TIME_PERIODE 400 // ms definition of periode for checking time change (RTC change )
 #define HEATING_PERIODE 1000 // every 5 minute check for change - turn on / off heater
-#define LOG_PERIODE 1200 // in seconds - every 20 minute LOG
+#define LOG_PERIODE 600 // in seconds - every 10 minute LOG
 
 #ifdef DEBUG_TERMOSTAT
 	#define LOG_PERIODE 60
