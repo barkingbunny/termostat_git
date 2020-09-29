@@ -106,6 +106,7 @@ uint8_t Log_Read(log_item_t* log_Handle){
 		index_log_read=index_log_wr-1;  // set the reading data to the latest log
 		flags_log.read_request = TRUE;
 	}
+	if ( 0 != Log_memory_fullness() ) return 0;
 
 #ifdef DEBUG_TERMOSTAT
 char buffer_s [32];
@@ -115,12 +116,13 @@ lcd_printString(buffer_s);
 #endif
 
 	do {	// Write je uz o jedno vetsi, tak neni treba ho navysovat...
-lcd_printString("R");
 		index_log_read++;
 		if (index_log_read >= LOG_DATA_LENGTH)
 			index_log_read = 0;
 		// NEBEZPECI pri prazdnem bufferu se to zde zacykli a kousne se cely procesor
 	} while (0 == log_data[index_log_read].day);
+
+
 
 #ifdef DEBUG_TERMOSTAT
 lcd_setCharPos(2,0);
@@ -160,12 +162,11 @@ uint8_t Log_To_String(char* field_of_char, uint8_t field_lenght){
 		RTC_TimeMark_Log_Struct(&log_Handle, TimeMark);
 		snprintf((char*)field_of_char, 32, "%s;%d;%d;",TimeMark,log_Handle.temp_1, log_Handle.hum_1);
 	}
+		return log_read_stat;
+		// 2 - if there are more data to read, return 2;
+		// 1 - if all memory was read, return 1;
+		// 0 - nodata in memeory / ERROR
 
-	if (2 == log_read_stat){ // if there are more data to read, return 2;
-		return 2;
-	}
-	// if all memory was read, return 1;
-	return 1;
 }
 
 /**

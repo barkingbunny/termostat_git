@@ -531,7 +531,7 @@ hrej();
 			show = desktop;
 		}
 // MENU TIMEOUT
-		if (TRUE==flags.menu_running) // je to takhle slozite , protoze jsem neprisel na jiny efektivni zpusob, jak smazat displej, po zkonceni menu
+		if (TRUE==flags.menu_running){ // je to takhle slozite , protoze jsem neprisel na jiny efektivni zpusob, jak smazat displej, po zkonceni menu
 			if (!menu_timout()) {
 				if (!menu_action()){ // exit from menu condition
 					flags.menu_running=0;
@@ -546,7 +546,8 @@ hrej();
 				lcd_clear();
 				show = desktop;
 			}
-
+			fill_comparer(BACKLITE_TIMEOUT, &backlite_compare); // Pro udrzeni rozsviceneho displeje v menu! NETESTOVANO.
+		}
 		if (flags.temp_new_set){
 			flags.temp_new_set = FALSE;
 			show = desktop;

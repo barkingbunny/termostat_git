@@ -247,6 +247,8 @@ uint8_t menu_action(){
 
 				char buffer_menu5[19];
 				uint8_t	log_readings = Log_To_String(&buffer_menu5, 18);
+				if (0 == log_readings) // no data to read
+					snprintf(buffer_menu5, 19, "NO DATA TO READ");
 				lcd_setCharPos(3,0);
 				lcd_printString(buffer_menu5);
 				HAL_Delay(1000);
@@ -257,6 +259,8 @@ uint8_t menu_action(){
 					return 0; //exit menu
 				}
 				if (1 == log_readings) // all data read
+					return 0;//exit menu, finished
+				if (0 == log_readings) // no data to read
 					return 0;//exit menu, finished
 
 				break;
